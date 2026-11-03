@@ -220,32 +220,25 @@ export async function ShopView({
 
   return (
     <>
-      <section className="relative overflow-hidden bg-marine-900 text-white">
-        {/* The category name floods the background and ghosts behind the H1. */}
-        <p
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 -bottom-6 select-none whitespace-nowrap text-center font-black leading-[0.8] tracking-tighter text-marine-800 text-[clamp(8rem,26vw,22rem)]"
-        >
-          {category ? category.name : "Shop"}
-        </p>
-        <div className="relative mx-auto max-w-7xl px-4 pb-28 pt-16 sm:px-6 sm:pb-32 sm:pt-24">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-400">
+      <section className="relative border-b border-line bg-[#f6f7fa] text-foreground">
+        <div className="store-container pb-16 pt-10 sm:pb-20 sm:pt-14">
+          <p className="eyebrow text-marine-700">
             {category ? "Category" : "The catalogue"}
           </p>
-          <h1 className="mt-3 font-bold leading-[0.95] tracking-tight text-[clamp(2.5rem,7vw,5.5rem)]">
+          <h1 className="mt-4 text-[clamp(2.25rem,5vw,3.5rem)] font-semibold leading-[1.08] tracking-[-0.045em]">
             {heading}
           </h1>
           {intro && (
-            <p className="mt-5 max-w-xl text-base text-marine-200 sm:text-lg">{intro}</p>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted sm:text-base">{intro}</p>
           )}
         </div>
       </section>
 
-      <div className="mx-auto -mt-8 max-w-7xl px-4 sm:px-6">
+      <div className="store-container -mt-7">
         <form
           action={basePath}
           role="search"
-          className="relative flex items-center gap-3 rounded-2xl bg-white p-3 shadow-lg ring-1 ring-line"
+          className="relative flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-line"
         >
           <label htmlFor="shop-q" className="sr-only">
             Search the shop
@@ -259,7 +252,7 @@ export async function ShopView({
             className="h-11 min-w-0 flex-1 rounded-xl bg-transparent px-2 text-base focus:outline-none focus:ring-2 focus:ring-marine-100 sm:px-3 sm:text-sm"
           />
           {query.sort && query.sort !== "featured" && <input type="hidden" name="sort" value={query.sort} />}
-          <button type="submit" className="h-11 shrink-0 rounded-full bg-marine-700 px-4 text-sm font-semibold text-white hover:bg-marine-800 sm:px-6">
+          <button type="submit" className="h-11 shrink-0 rounded-xl bg-marine-700 px-4 text-sm font-semibold text-white hover:bg-marine-800 sm:px-6">
             Search
           </button>
         </form>
@@ -285,7 +278,7 @@ export async function ShopView({
         </nav>
       )}
 
-      <div className="mx-auto mt-8 grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[240px_1fr]">
+      <div className="store-container mt-8 grid gap-8 lg:grid-cols-[220px_1fr]">
         <details className="rounded-2xl border border-line px-4 py-3 lg:hidden">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-marine-900 [&::-webkit-details-marker]:hidden">
             Categories &amp; filters{activeCount > 0 && ` (${activeCount})`}
@@ -293,7 +286,7 @@ export async function ShopView({
           </summary>
           <div className="mt-5 space-y-8">{sidebar}</div>
         </details>
-        <aside className="hidden space-y-8 lg:block" aria-label="Categories and filters">
+        <aside className="hidden self-start space-y-7 rounded-2xl border border-line bg-white p-4 lg:block" aria-label="Categories and filters">
           {sidebar}
         </aside>
 
@@ -329,7 +322,7 @@ export async function ShopView({
               </Link>
             </div>
           ) : (
-            <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-6 grid grid-cols-1 gap-4 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
               {page.items.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}

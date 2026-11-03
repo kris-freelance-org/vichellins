@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { addToCart, type CartItem } from "@/lib/cart-store";
+import { Icon } from "./Icon";
 
 const base =
-  "inline-flex min-h-11 min-w-0 flex-1 basis-24 items-center justify-center rounded-full px-3 py-2 text-center text-sm font-semibold transition-colors";
+  "inline-flex min-h-11 min-w-0 flex-1 basis-24 items-center justify-center gap-2 rounded-xl px-3 py-2 text-center text-xs font-semibold transition-colors";
 
 /**
  * Card buttons. A single-variant product can be added straight from the card;
@@ -37,14 +38,9 @@ export function CardActions({
 
   if (!item) {
     return (
-      <>
-        <Link href={href} className={`${base} border border-line bg-white text-marine-900 hover:border-marine-700`}>
-          Choose options
-        </Link>
-        <Link href={href} className={`${base} bg-marine-700 text-white hover:bg-marine-800`}>
-          Buy now
-        </Link>
-      </>
+      <Link href={href} className={`${base} bg-marine-700 text-white hover:bg-marine-800`}>
+        Choose options <Icon name="arrow" className="h-3.5 w-3.5 shrink-0" />
+      </Link>
     );
   }
 

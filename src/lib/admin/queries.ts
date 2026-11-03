@@ -127,9 +127,9 @@ export type HomepageContent = {
 };
 
 export const defaultHomepageContent: HomepageContent = {
-  hero_headline: "Phones, laptops, audio and more —",
-  hero_accent: "all genuine, delivered fast.",
-  hero_sub: "Real products, real warranties, same-day delivery across Lagos. And we're always a WhatsApp message away.",
+  hero_headline: "Your next upgrade.",
+  hero_accent: "Starts here.",
+  hero_sub: "Phones, laptops, and the little things that make life better. Genuine tech, with real warranties, delivered across Lagos.",
   trust: [
     { title: "Genuine products", body: "We check and verify every item before it goes on the site." },
     { title: "Warranty included", body: "Manufacturer or store warranty, clearly stated on each product." },

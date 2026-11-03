@@ -2,20 +2,18 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart-store";
+import { Icon } from "./Icon";
 
 export function CartBadge() {
   const { count } = useCart();
   return (
     <Link
       href="/cart"
-      className="relative flex h-10 w-10 items-center justify-center rounded-full text-marine-900 hover:bg-surface"
+      className="relative flex h-11 items-center justify-center gap-2.5 rounded-xl px-3 text-marine-900 transition-colors hover:bg-surface"
       aria-label={count > 0 ? `Cart, ${count} item${count === 1 ? "" : "s"}` : "Cart"}
     >
-      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M3 4h2l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h7.7a1.5 1.5 0 0 0 1.5-1.1L20 8H6.2" />
-        <circle cx="9.5" cy="20" r="1.2" />
-        <circle cx="17" cy="20" r="1.2" />
-      </svg>
+      <Icon name="bag" className="h-[22px] w-[22px]" />
+      <span className="hidden text-sm font-medium sm:inline">Cart</span>
       {count > 0 && (
         <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-gold-400 px-1 text-[11px] font-bold text-marine-900">
           {count}

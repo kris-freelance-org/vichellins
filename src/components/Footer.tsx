@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTopCategories } from "@/lib/catalog";
 import { store, whatsappLink } from "@/lib/config";
 import { Logo } from "./Logo";
+import { Icon } from "./Icon";
 
 const socials = [
   { label: "Instagram", url: store.social.instagram },
@@ -40,11 +41,12 @@ export async function Footer() {
     companyColumn,
   ];
   return (
-    <footer className="mt-24 px-4 pb-6 sm:px-6">
+    <footer className="store-container mt-16 pb-24 sm:mt-20 sm:pb-8">
       <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl bg-marine-900 text-white">
-        <div className="grid gap-8 p-6 sm:p-12 lg:grid-cols-2 lg:items-end">
+        <div className="grid gap-8 p-7 sm:p-10 lg:grid-cols-2 lg:items-center">
           <div>
-            <h2 className="text-[clamp(1.5rem,4vw,2.25rem)] font-semibold leading-tight tracking-tight">
+            <p className="eyebrow mb-4 text-marine-100">Real people. Really helpful.</p>
+            <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] font-semibold leading-tight tracking-[-0.04em]">
               Not sure what to get?
               <br />
               <span className="text-gold-400">We&apos;re here on WhatsApp.</span>
@@ -58,9 +60,10 @@ export async function Footer() {
               href={whatsappLink("Hello Vichellins Nation, I have a question about a product.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex h-12 items-center rounded-full bg-gold-400 px-6 text-sm font-semibold text-marine-900 hover:bg-gold-300"
+              className="mt-5 inline-flex min-h-12 items-center gap-5 rounded-xl bg-gold-400 px-6 text-sm font-semibold text-marine-900 transition-colors hover:bg-gold-300"
             >
               Chat on WhatsApp
+              <Icon name="arrow" className="h-4 w-4" />
             </a>
           </div>
         </div>

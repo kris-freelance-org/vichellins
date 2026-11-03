@@ -32,9 +32,12 @@ export async function ProductCard({
   const min = getMinPrice(product);
   const hasRange = getMaxPrice(product) !== min;
   const single = product.variants.length === 1 ? getDefaultVariant(product) : undefined;
-  const onSale = product.variants.some(
+  const saleVariant = product.variants.find(
     (v) => v.price === min && v.compareAtPrice && v.compareAtPrice > v.price,
   );
+  const discount = saleVariant?.compareAtPrice
+    ? Math.round((1 - saleVariant.price / saleVariant.compareAtPrice) * 100)
+    : 0;
   const primaryImage = product.images[0];
 
   const cartItem = single
@@ -52,12 +55,12 @@ export async function ProductCard({
     : null;
 
   return (
-    <article className="@container group flex h-full min-w-0 flex-col">
+    <article className="product-card @container group flex h-full min-w-0 flex-col overflow-hidden rounded-[1.25rem] border border-line bg-white p-2.5 sm:p-3">
       <Link
         href={href}
         aria-label={`${product.name}${soldOut ? " – out of stock" : ""}`}
         className={`relative block aspect-[5/4] overflow-hidden ${
-          prominent ? "rounded-[2rem] bg-marine-50" : "rounded-3xl bg-surface"
+          prominent ? "rounded-2xl bg-marine-50" : "rounded-xl bg-[#f5f6f8]"
         }`}
       >
         <div className="absolute left-3 top-3 z-10 flex gap-1.5">
@@ -66,8 +69,8 @@ export async function ProductCard({
               {product.condition}
             </span>
           )}
-          {onSale && !soldOut && (
-            <span className="rounded-full bg-marine-900 px-2.5 py-1 text-[11px] font-semibold text-white">Sale</span>
+          {discount > 0 && !soldOut && (
+            <span className="rounded-md bg-gold-400 px-2 py-1 text-[10px] font-semibold text-marine-950">−{discount}%</span>
           )}
           {prominent && (
             <span className="rounded-full bg-marine-900 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-gold-300">
@@ -75,11 +78,6 @@ export async function ProductCard({
             </span>
           )}
         </div>
-        {category && (
-          <span className="absolute right-3 top-3 z-10 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-marine-900">
-            {category.name}
-          </span>
-        )}
         {primaryImage ? (
           <div className="absolute inset-4 sm:inset-5">
             <Image
@@ -100,12 +98,12 @@ export async function ProductCard({
           />
         )}
       </Link>
-      <div className={`flex flex-1 flex-col ${prominent ? "mt-5" : "mt-3"}`}>
-        <p className={`text-muted ${prominent ? "text-sm" : "text-xs"}`}>{brand?.name}</p>
-        <div className="flex min-w-0 flex-col items-start gap-1.5 @min-[22rem]:flex-row @min-[22rem]:justify-between @min-[22rem]:gap-3">
+      <div className={`flex flex-1 flex-col px-1 pb-1 ${prominent ? "mt-5" : "mt-4"}`}>
+        <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted">{brand?.name || category?.name}</p>
+        <div className="mt-1.5 flex min-w-0 flex-col items-start gap-2">
           <h3
             className={`min-w-0 break-words text-marine-900 ${
-              prominent ? "font-bold text-xl leading-tight tracking-tight sm:text-2xl" : "text-sm font-semibold"
+              prominent ? "font-bold text-xl leading-tight tracking-tight sm:text-2xl" : "text-sm font-semibold leading-snug tracking-tight sm:text-base"
             }`}
           >
             <Link href={href} className="hover:underline">
@@ -114,7 +112,7 @@ export async function ProductCard({
           </h3>
           <p
             className={`shrink-0 font-semibold tabular-nums text-marine-900 ${
-              prominent ? "text-xl sm:text-2xl" : "text-sm"
+              prominent ? "text-xl sm:text-2xl" : "text-base tracking-tight sm:text-lg"
             }`}
           >
             {hasRange && (
@@ -125,14 +123,15 @@ export async function ProductCard({
               </span>
             )}
             {formatPrice(min)}
+            {discount > 0 && saleVariant?.compareAtPrice && <del className="ml-2 text-[11px] font-normal text-muted">{formatPrice(saleVariant.compareAtPrice)}</del>}
           </p>
         </div>
-        <p className={`text-muted ${prominent ? "mt-2 text-sm" : "mt-1 text-xs"}`}>
+        <p className={`text-muted ${prominent ? "mt-2 text-sm" : "mt-2 text-[11px] leading-relaxed"}`}>
           {product.warranty.months > 0 ? `${product.warranty.months} month warranty` : "No warranty"}
           {" · "}
-          {soldOut ? "Out of stock" : "In stock"}
+          <span className={soldOut ? "text-muted" : "text-success-700"}>{soldOut ? "Out of stock" : "In stock"}</span>
         </p>
-        <div className={`flex flex-wrap gap-2 ${prominent ? "mt-5" : "mt-3"}`}>
+        <div className={`flex flex-1 flex-wrap items-end gap-2 pt-4 ${prominent ? "mt-2" : ""}`}>
           <CardActions href={href} item={cartItem} soldOut={soldOut} />
         </div>
       </div>

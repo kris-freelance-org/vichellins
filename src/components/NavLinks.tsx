@@ -18,13 +18,13 @@ function isActive(pathname: string, href: string) {
 export function DesktopNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Main" className="ml-6 hidden items-center gap-1 lg:flex">
+    <nav aria-label="Main" className="hidden shrink-0 items-center gap-1 lg:flex">
       {nav.map((item) => (
         <Link
           key={item.href}
           href={item.href}
           aria-current={isActive(pathname, item.href) ? "page" : undefined}
-          className="rounded-full px-4 py-2.5 text-sm font-medium text-marine-900 hover:bg-surface aria-[current=page]:bg-marine-50 aria-[current=page]:text-marine-700"
+          className="inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-medium text-muted transition-colors hover:bg-surface hover:text-marine-700 aria-[current=page]:bg-marine-50 aria-[current=page]:text-marine-700"
         >
           {item.label}
         </Link>

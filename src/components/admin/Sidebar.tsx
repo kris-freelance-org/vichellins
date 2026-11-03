@@ -34,6 +34,10 @@ const groups: { title: string; items: Item[] }[] = [
     items: [{ href: "/admin/homepage", label: "Homepage", roles: all }],
   },
   {
+    title: "Workspace",
+    items: [{ href: "/admin/workspace", label: "Members", roles: commerce }],
+  },
+  {
     title: "Shop",
     items: [
       { href: "/admin/delivery", label: "Delivery zones", roles: commerce },

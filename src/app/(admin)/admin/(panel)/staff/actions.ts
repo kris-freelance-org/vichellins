@@ -81,6 +81,26 @@ export async function resetStaffPassword(_prev: ActionState, form: FormData): Pr
   return done(`New temporary password: ${password}  (shown once. Send it privately.)`);
 }
 
+export async function setStaffActive(_prev: ActionState, form: FormData): Promise<ActionState> {
+  const me = await owner();
+  const id = formString(form, "id");
+  const active = formString(form, "active") === "true";
+  if (!id) return fail("Missing staff member.");
+  if (id === me.id) return fail("You can't suspend your own account.");
+
+  const supabase = await createClient();
+  const { data: target } = await supabase.from("staff").select("role, is_active").eq("user_id", id).maybeSingle();
+  if (!target) return fail("That staff member no longer exists.");
+  if (!active && target.role === "owner" && (await ownerCount(supabase)) <= 1) {
+    return fail("There must always be at least one active owner. Promote someone else first.");
+  }
+
+  const { error } = await supabase.from("staff").update({ is_active: active }).eq("user_id", id);
+  if (error) return fail(friendlyError(error));
+  revalidatePath("/admin/staff");
+  return done(active ? "Access restored." : "Access suspended. They can no longer sign in.");
+}
+
 export async function removeStaff(_prev: ActionState, form: FormData): Promise<ActionState> {
   const me = await owner();
   const id = formString(form, "id");

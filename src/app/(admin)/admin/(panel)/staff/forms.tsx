@@ -2,7 +2,7 @@
 
 import { ActionForm, SubmitButton } from "@/components/admin/forms";
 import { Field, inputClass } from "@/components/admin/ui";
-import { createStaff, removeStaff, resetStaffPassword, updateStaff } from "./actions";
+import { createStaff, removeStaff, resetStaffPassword, setStaffActive, updateStaff } from "./actions";
 
 const roleHelp = {
   owner: "Everything, including staff accounts.",
@@ -27,9 +27,9 @@ export function AddStaffForm() {
   );
 }
 
-export function StaffRow({ member, isMe }: { member: { id: string; name: string; role: string; email: string }; isMe: boolean }) {
+export function StaffRow({ member, isMe }: { member: { id: string; name: string; role: string; email: string; isActive: boolean }; isMe: boolean }) {
   return (
-    <li className="rounded-xl border border-line bg-white p-4">
+    <li className={`rounded-xl border p-4 ${member.isActive ? "border-line bg-white" : "border-gold-300 bg-gold-50/40"}`}>
       <details>
         <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
           <span>
@@ -37,6 +37,9 @@ export function StaffRow({ member, isMe }: { member: { id: string; name: string;
             <span className="block text-xs text-muted">{member.email}</span>
           </span>
           <span className="flex items-center gap-3 text-sm">
+            {!member.isActive && (
+              <span className="rounded-full bg-gold-100 px-2.5 py-1 text-xs font-medium text-gold-800">Suspended</span>
+            )}
             <span className="rounded-full bg-marine-50 px-2.5 py-1 text-xs font-medium capitalize text-marine-800">{member.role}</span>
             <span className="text-muted underline">Manage</span>
           </span>
@@ -60,9 +63,20 @@ export function StaffRow({ member, isMe }: { member: { id: string; name: string;
                 <input type="hidden" name="id" value={member.id} />
                 <SubmitButton variant="secondary" pendingText="Resetting…" confirm={`Reset ${member.name}'s password? Their old password stops working.`}>Reset password</SubmitButton>
               </ActionForm>
+              <ActionForm action={setStaffActive}>
+                <input type="hidden" name="id" value={member.id} />
+                <input type="hidden" name="active" value={member.isActive ? "false" : "true"} />
+                <SubmitButton
+                  variant={member.isActive ? "secondary" : "primary"}
+                  pendingText={member.isActive ? "Suspending…" : "Reactivating…"}
+                  confirm={member.isActive ? `Suspend ${member.name}? They will be signed out and can't sign in until reactivated.` : undefined}
+                >
+                  {member.isActive ? "Suspend access" : "Reactivate access"}
+                </SubmitButton>
+              </ActionForm>
               <ActionForm action={removeStaff}>
                 <input type="hidden" name="id" value={member.id} />
-                <SubmitButton variant="danger" pendingText="Removing…" confirm={`Remove ${member.name}? They will no longer be able to sign in.`}>Remove access</SubmitButton>
+                <SubmitButton variant="danger" pendingText="Removing…" confirm={`Permanently delete ${member.name}'s account? This can't be undone. Suspend instead if you might restore access later.`}>Delete account</SubmitButton>
               </ActionForm>
             </div>
           )}

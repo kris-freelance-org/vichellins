@@ -9,14 +9,20 @@ export const metadata = { title: "Staff" };
 export default async function StaffPage() {
   const me = await requireStaff(["owner"]);
   const supabase = await createClient();
-  const { data: rows } = await supabase.from("staff").select("user_id, role, name").order("name");
+  const { data: rows } = await supabase.from("staff").select("user_id, role, name, is_active").order("name");
 
   // Emails live in the auth system, which only the service role can read.
   const emails = new Map<string, string>();
   const { data: users } = await createServiceClient().auth.admin.listUsers({ perPage: 200 });
   for (const u of users?.users ?? []) emails.set(u.id, u.email ?? "");
 
-  const members = (rows ?? []).map((r) => ({ id: r.user_id, name: r.name, role: r.role, email: emails.get(r.user_id) ?? "" }));
+  const members = (rows ?? []).map((r) => ({
+    id: r.user_id,
+    name: r.name,
+    role: r.role,
+    email: emails.get(r.user_id) ?? "",
+    isActive: r.is_active,
+  }));
   return (
     <>
       <PageHeader title="Staff" description="Who can sign in to this admin, and what they can do." />

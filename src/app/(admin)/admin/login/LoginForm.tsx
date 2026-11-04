@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { ActionForm, SubmitButton } from "@/components/admin/forms";
 import { AdminIcon } from "@/components/admin/AdminIcon";
@@ -19,6 +20,7 @@ export function LoginForm({ next }: { next: string }) {
           <input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" required className={`${inputClass} pr-19`} />
           <button type="button" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} className="absolute bottom-0 right-1 flex h-11 items-center gap-1.5 rounded-lg px-2 text-[11px] font-medium text-muted hover:text-marine-700"><AdminIcon name="eye" className="h-4 w-4" />{showPassword ? "Hide" : "Show"}</button>
         </div>
+        <Link href="/admin/forgot-password" className="mt-2 inline-block text-xs font-medium text-marine-700 hover:underline">Forgot your password?</Link>
       </Field>
       <div className="pt-2 [&>button]:w-full"><SubmitButton pendingText="Signing in…">Sign in to your store <AdminIcon name="arrow" className="h-4 w-4" /></SubmitButton></div>
     </ActionForm>

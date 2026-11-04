@@ -18,10 +18,10 @@ export async function getStaff(): Promise<Staff | null> {
   if (!data.user) return null;
   const { data: row } = await supabase
     .from("staff")
-    .select("role, name")
+    .select("role, name, is_active")
     .eq("user_id", data.user.id)
     .maybeSingle();
-  if (!row) return null;
+  if (!row || !row.is_active) return null;
   return {
     id: data.user.id,
     email: data.user.email ?? "",

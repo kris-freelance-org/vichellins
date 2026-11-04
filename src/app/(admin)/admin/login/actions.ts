@@ -21,12 +21,16 @@ export async function signIn(_prev: ActionState, formData: FormData): Promise<Ac
 
   const { data: staff } = await supabase
     .from("staff")
-    .select("role")
+    .select("role, is_active")
     .eq("user_id", data.user.id)
     .maybeSingle();
   if (!staff) {
     await supabase.auth.signOut();
     return fail("This account doesn't have admin access. Ask the shop owner to add you.");
+  }
+  if (!staff.is_active) {
+    await supabase.auth.signOut();
+    return fail("This account has been suspended. Ask the shop owner to reactivate it.");
   }
 
   redirect(safeNext(formData.get("next")));

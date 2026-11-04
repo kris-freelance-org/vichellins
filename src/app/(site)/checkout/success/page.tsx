@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { clearCart } from "@/lib/cart-store";
 import { whatsappLink } from "@/lib/config";
 import { formatPrice } from "@/lib/format";
@@ -70,6 +70,20 @@ const TONE_CLASSES: Record<"gold" | "blue" | "green" | "red", string> = {
 };
 
 export default function SuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6">
+          <p className="text-sm text-muted">Loading your order…</p>
+        </div>
+      }
+    >
+      <SuccessContent />
+    </Suspense>
+  );
+}
+
+function SuccessContent() {
   const params = useSearchParams();
   const orderParam = params.get("order");
 

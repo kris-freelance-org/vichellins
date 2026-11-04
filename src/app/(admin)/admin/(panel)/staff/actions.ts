@@ -38,7 +38,9 @@ export async function createStaff(_prev: ActionState, form: FormData): Promise<A
   }
 
   const supabase = await createClient();
-  const { error: staffError } = await supabase.from("staff").insert({ user_id: data.user.id, role, name });
+  const { error: staffError } = await supabase
+    .from("staff")
+    .insert({ user_id: data.user.id, role, name, must_change_password: true });
   if (staffError) {
     // Don't leave a login behind that has no staff record.
     await service.auth.admin.deleteUser(data.user.id);
@@ -78,7 +80,12 @@ export async function resetStaffPassword(_prev: ActionState, form: FormData): Pr
   const password = tempPassword();
   const { error } = await createServiceClient().auth.admin.updateUserById(id, { password });
   if (error) return fail("Couldn't reset the password. Please try again.");
-  return done(`New temporary password: ${password}  (shown once. Send it privately.)`);
+
+  // Flag the account so the next sign-in forces them to pick their own password.
+  const supabase = await createClient();
+  await supabase.from("staff").update({ must_change_password: true }).eq("user_id", id);
+
+  return done(`New temporary password: ${password}  (shown once. Send it privately. They'll be asked to set their own on next sign-in.)`);
 }
 
 export async function setStaffActive(_prev: ActionState, form: FormData): Promise<ActionState> {

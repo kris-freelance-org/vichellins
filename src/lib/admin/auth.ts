@@ -9,6 +9,7 @@ export type Staff = {
   email: string;
   name: string;
   role: Role;
+  mustChangePassword: boolean;
 };
 
 /** The signed-in staff member, or null. Verifies the token with Supabase, not just the cookie. */
@@ -18,7 +19,7 @@ export async function getStaff(): Promise<Staff | null> {
   if (!data.user) return null;
   const { data: row } = await supabase
     .from("staff")
-    .select("role, name, is_active")
+    .select("role, name, is_active, must_change_password")
     .eq("user_id", data.user.id)
     .maybeSingle();
   if (!row || !row.is_active) return null;
@@ -27,6 +28,7 @@ export async function getStaff(): Promise<Staff | null> {
     email: data.user.email ?? "",
     name: row.name || data.user.email || "Staff",
     role: row.role as Role,
+    mustChangePassword: Boolean(row.must_change_password),
   };
 }
 

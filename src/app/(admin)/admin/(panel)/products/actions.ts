@@ -61,8 +61,17 @@ export async function saveProduct(_prev: ActionState, form: FormData): Promise<A
   }
   if (!id) return fail("Couldn't save the product. Please try again.");
 
+  // payment_methods isn't part of the save_product RPC payload; it's written
+  // separately so the RPC stays the same shape callers already know.
+  const { error: paymentError } = await supabase
+    .from("products")
+    .update({ payment_methods: payload.payment_methods })
+    .eq("id", id);
+  if (paymentError) return fail(friendlyError(paymentError));
+
   revalidatePath("/admin/products");
   revalidatePath("/admin");
+  revalidatePath("/checkout");
   updateTag(CATALOG_TAG);
   redirect(`/admin/products/${id}?${payload.id ? "saved" : "created"}=1`);
 }

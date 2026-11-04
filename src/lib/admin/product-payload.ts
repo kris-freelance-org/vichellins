@@ -28,6 +28,7 @@ export const productPayloadSchema = z.object({
   seo_description: text(300),
   kind: z.string().nullable().optional(),
   tone: z.string().nullable().optional(),
+  payment_methods: z.array(z.enum(["cod", "transfer"])).min(1).max(2).nullable(),
   options: z
     .array(z.object({ name: text(40), values: z.array(text(60)).max(30) }))
     .max(3),

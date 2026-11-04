@@ -6,7 +6,9 @@
       "Bash(git checkout *)",
       "Bash(git ls-tree *)",
       "Bash(git update-ref *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(npx --no-install eslint src/app/\\\\\\(admin\\\\\\)/admin/\\\\\\(panel\\\\\\)/delivery src/app/\\\\\\(admin\\\\\\)/admin/\\\\\\(panel\\\\\\)/products src/app/\\\\\\(site\\\\\\)/checkout src/lib/admin/product-payload.ts)",
+      "Bash(npx --no-install tsc --noEmit)"
     ]
   }
 }

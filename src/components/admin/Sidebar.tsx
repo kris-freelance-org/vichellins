@@ -28,7 +28,7 @@ const groups: { title: string; items: Item[] }[] = [
   ] },
   { title: "Store", items: [
     { href: "/admin/homepage", label: "Homepage", icon: "homepage", roles: all },
-    { href: "/admin/delivery", label: "Delivery zones", icon: "delivery", roles: commerce },
+    { href: "/admin/delivery", label: "Delivery settings", icon: "delivery", roles: commerce },
     { href: "/admin/workspace", label: "Members", icon: "people", roles: commerce },
     { href: "/admin/staff", label: "Staff", icon: "account", roles: ["owner"] },
   ] },

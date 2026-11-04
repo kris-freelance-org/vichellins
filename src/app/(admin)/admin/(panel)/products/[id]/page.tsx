@@ -58,6 +58,7 @@ export default async function EditProductPage({ params, searchParams }: PageProp
     seo_description: row.seo_description,
     kind: row.kind,
     tone: row.tone,
+    payment_methods: row.payment_methods ?? null,
     options,
     variants,
   };

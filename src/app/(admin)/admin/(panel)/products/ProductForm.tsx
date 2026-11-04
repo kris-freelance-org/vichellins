@@ -48,9 +48,22 @@ export type ProductData = {
   seo_description: string | null;
   kind: string | null;
   tone: string | null;
+  payment_methods: ("cod" | "transfer")[] | null;
   options: { name: string; values: string[] }[];
   variants: VariantData[];
 };
+
+type PaymentChoice = "default" | "cod" | "transfer";
+
+function paymentChoiceFrom(methods: ("cod" | "transfer")[] | null | undefined): PaymentChoice {
+  if (!methods || methods.length === 0 || methods.length === 2) return "default";
+  return methods[0];
+}
+
+function paymentChoiceToArray(choice: PaymentChoice): ("cod" | "transfer")[] | null {
+  if (choice === "default") return null;
+  return [choice];
+}
 
 type Row = {
   id: string | null;
@@ -139,6 +152,7 @@ export function ProductForm({
   const [specs, setSpecs] = useState<Record<string, string>>(() =>
     Object.fromEntries(Object.entries(product?.specs ?? {}).map(([k, v]) => [k, String(v)])),
   );
+  const [paymentChoice, setPaymentChoice] = useState<PaymentChoice>(paymentChoiceFrom(product?.payment_methods));
   const [options, setOptions] = useState<OptionDraft[]>(
     (product?.options ?? []).map((o) => ({ name: o.name, valuesText: o.values.join(", ") })),
   );
@@ -235,6 +249,7 @@ export function ProductForm({
     seo_description: seoDescription.trim(),
     kind: product?.kind ?? null,
     tone: product?.tone ?? null,
+    payment_methods: paymentChoiceToArray(paymentChoice),
     options: parsedOptions,
     variants: rows
       // Inactive variants left over from removed option values are dropped; the database deactivates them.
@@ -376,6 +391,39 @@ export function ProductForm({
           <Field label="Authenticity notes" htmlFor="authenticity-notes" hint="e.g. “Sealed box, IMEI checked”.">
             <input id="authenticity-notes" value={authNotes} onChange={bind(setAuthNotes)} maxLength={500} className={inputClass} />
           </Field>
+        </div>
+      </Card>
+
+      <Card
+        title="Payment methods"
+        description="Pick how shoppers can pay for this product. Leave on site defaults unless this product needs a different rule."
+      >
+        <div className="space-y-2">
+          {([
+            { id: "default", label: "Use site defaults", hint: "Whatever's switched on in Delivery settings." },
+            { id: "cod", label: "Pay on delivery only", hint: "Shoppers can't choose bank transfer for this product." },
+            { id: "transfer", label: "Bank transfer only", hint: "Shoppers can't choose pay on delivery for this product." },
+          ] as const).map((o) => (
+            <label
+              key={o.id}
+              className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm text-marine-900 ${
+                paymentChoice === o.id ? "border-marine-700 bg-marine-50" : "border-line bg-white"
+              }`}
+            >
+              <input
+                type="radio"
+                name="payment_choice"
+                value={o.id}
+                checked={paymentChoice === o.id}
+                onChange={() => setPaymentChoice(o.id)}
+                className="mt-0.5 h-4 w-4 accent-marine-700"
+              />
+              <span>
+                <span className="block font-semibold">{o.label}</span>
+                <span className="block text-xs text-muted">{o.hint}</span>
+              </span>
+            </label>
+          ))}
         </div>
       </Card>
 

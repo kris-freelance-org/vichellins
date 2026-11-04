@@ -9,8 +9,6 @@ export const metadata: Metadata = { title: "Sign in" };
 export default async function LoginPage({ searchParams }: PageProps<"/admin/login">) {
   const query = await searchParams;
   const next = query.next;
-  const reset = query.reset === "1";
-  const error = typeof query.error === "string" ? query.error : null;
   return (
     <main className="admin-login">
       <section className="admin-login-brand" aria-label="Vichellins store management">
@@ -35,9 +33,6 @@ export default async function LoginPage({ searchParams }: PageProps<"/admin/logi
           <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-marine-700">Your store workspace</p>
           <h1 id="login-title" className="text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl">Welcome back.</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted">Sign in to manage Vichellins Nation.</p>
-          {reset && <p className="mt-5 rounded-xl border border-success-200 bg-success-50 p-3 text-sm text-success-800">Password updated. Sign in with your new password.</p>}
-          {error === "expired_link" && <p className="mt-5 rounded-xl border border-danger-200 bg-danger-50 p-3 text-sm text-danger-800">That reset link has expired. Request a new one.</p>}
-          {error === "missing_code" && <p className="mt-5 rounded-xl border border-danger-200 bg-danger-50 p-3 text-sm text-danger-800">That link is incomplete. Request a new one.</p>}
           <LoginForm next={typeof next === "string" ? next : ""} />
           <p className="mt-7 flex items-center justify-center gap-2 text-[11px] text-muted"><AdminIcon name="lock" className="h-3.5 w-3.5" /> For authorised store staff only</p>
         </div>

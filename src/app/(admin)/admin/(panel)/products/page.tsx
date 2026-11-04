@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { EmptyState, LinkButton, PageHeader, StatusBadge, Table, td, th, inputClass, buttonStyles } from "@/components/admin/ui";
+import Form from "next/form";
+import { FilterSubmit } from "@/components/admin/FilterSubmit";
+import { redirect } from "next/navigation";
+import { ActiveFilters, Pagination } from "@/components/admin/ListTools";
+import { LoadError } from "@/components/admin/LoadError";
+import { AdminIcon } from "@/components/admin/AdminIcon";
+import { EmptyState, LinkButton, PageHeader, StatusBadge, Table, td, th, inputClass } from "@/components/admin/ui";
 import { COMMERCE, requireStaff } from "@/lib/admin/auth";
 import { flattenTree, loadCategories } from "@/lib/admin/queries";
 import { formatPrice } from "@/lib/format";
@@ -25,8 +31,8 @@ export default async function ProductsPage({ searchParams }: PageProps<"/admin/p
   await requireStaff(COMMERCE);
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().slice(0, 80) : "";
-  const status = typeof params.status === "string" ? params.status : "";
-  const category = typeof params.category === "string" ? params.category : "";
+  const status = typeof params.status === "string" && ["draft", "published", "archived"].includes(params.status) ? params.status : "";
+  const category = typeof params.category === "string" && /^[0-9a-f-]{36}$/i.test(params.category) ? params.category : "";
   const page = Math.max(1, Number.parseInt(typeof params.page === "string" ? params.page : "1", 10) || 1);
 
   const supabase = await createClient();
@@ -42,25 +48,34 @@ export default async function ProductsPage({ searchParams }: PageProps<"/admin/p
   if (["draft", "published", "archived"].includes(status)) query = query.eq("status", status);
   if (/^[0-9a-f-]{36}$/i.test(category)) query = query.eq("category_id", category);
 
-  const [{ data, count }, categories] = await Promise.all([query, loadCategories(supabase)]);
+  const [{ data, count, error }, categories] = await Promise.all([query, loadCategories(supabase)]);
   const rows = (data ?? []) as unknown as Row[];
   const total = count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const link = (p: number) => {
+  const link = (p: number, overrides: Record<string, string | undefined> = {}) => {
     const next = new URLSearchParams();
-    if (q) next.set("q", q);
-    if (status) next.set("status", status);
-    if (category) next.set("category", category);
+    for (const [key, value] of Object.entries({ q, status, category, ...overrides })) if (value) next.set(key, value);
     if (p > 1) next.set("page", String(p));
     const s = next.toString();
     return `/admin/products${s ? `?${s}` : ""}`;
   };
+  if (error?.code === "PGRST103" && page > 1) {
+    const available = await query.range(0, 0);
+    if (!available.error && available.count !== null) redirect(link(Math.max(1, Math.ceil(available.count / PAGE_SIZE))));
+  }
+  if (!error && page > pages) redirect(link(pages));
+  const filtered = Boolean(q || status || category);
+  const filters = [
+    ...(q ? [{ label: `Search: ${q}`, removeHref: link(1, { q: undefined }) }] : []),
+    ...(status ? [{ label: `Status: ${status}`, removeHref: link(1, { status: undefined }) }] : []),
+    ...(category ? [{ label: `Category: ${categories.find(c => c.id === category)?.name ?? "Selected category"}`, removeHref: link(1, { category: undefined }) }] : []),
+  ];
 
   return (
     <>
       <PageHeader
         title="Products"
-        description={`${total} product${total === 1 ? "" : "s"}`}
+        description="Manage what shoppers see, from product details to availability."
         actions={
           <>
             <LinkButton href="/admin/products/import" icon="download">Bulk import</LinkButton>
@@ -69,10 +84,10 @@ export default async function ProductsPage({ searchParams }: PageProps<"/admin/p
         }
       />
 
-      <form className="admin-filterbar mb-5 flex flex-wrap items-end gap-3" role="search">
+      <Form action="/admin/products" key={[q, status, category].join(":")} className="admin-filterbar mb-5 flex flex-wrap items-end gap-3" role="search" aria-label="Filter products">
         <div className="min-w-0 basis-full flex-1 sm:basis-48">
           <label htmlFor="q" className="text-sm font-medium text-marine-900">Search</label>
-          <input id="q" name="q" defaultValue={q} placeholder="Product name" className={inputClass} />
+          <input id="q" name="q" type="search" defaultValue={q} placeholder="Product name" className={inputClass} />
         </div>
         <div>
           <label htmlFor="status" className="text-sm font-medium text-marine-900">Status</label>
@@ -92,17 +107,40 @@ export default async function ProductsPage({ searchParams }: PageProps<"/admin/p
             ))}
           </select>
         </div>
-        <button type="submit" className={buttonStyles.secondary}>Filter</button>
-      </form>
+        <FilterSubmit />
+      </Form>
+      <ActiveFilters filters={filters} clearHref="/admin/products" />
 
-      {rows.length === 0 ? (
+      {error ? <LoadError subject="your products" /> : rows.length === 0 ? (
         <EmptyState
           title={q || status || category ? "No products match" : "No products yet"}
           body={q || status || category ? "Try a different search or clear the filters." : "Add your first product to start selling."}
-          action={<LinkButton href="/admin/products/new" variant="primary">Add product</LinkButton>}
+          action={filtered ? <LinkButton href="/admin/products">Clear filters</LinkButton> : <LinkButton href="/admin/products/new" variant="primary">Add product</LinkButton>}
         />
       ) : (
-        <Table>
+        <>
+        <ul aria-label="Products" className="space-y-3 @min-[48rem]:hidden">
+          {rows.map(p => {
+            const active = p.variants.filter(v => v.is_active);
+            const prices = active.map(v => v.price);
+            const stock = active.reduce((n, v) => n + v.stock, 0);
+            const image = [...p.product_images].sort((a, b) => a.sort_order - b.sort_order)[0];
+            return <li key={p.id}>
+              <Link href={`/admin/products/${p.id}`} className="group block rounded-2xl border border-line bg-white p-4 transition-colors hover:border-marine-200">
+                <div className="flex items-start gap-3">
+                  {image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={image.url} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-xl border border-line bg-surface object-contain p-1" />
+                  ) : <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-surface text-muted"><AdminIcon name="products" className="h-6 w-6" /></span>}
+                  <div className="min-w-0"><p className="break-words text-sm font-semibold text-marine-900">{p.name}</p><p className="mt-1 break-words text-xs text-muted">{[p.brand?.name, p.category?.name, p.featured ? "Featured" : null].filter(Boolean).join(" · ") || "No category or brand"}</p></div>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><StatusBadge status={p.status} /><span className={`text-xs font-medium ${stock === 0 ? "text-danger-700" : "text-muted"}`}>{stock === 0 ? "Out of stock" : `${stock} in stock`} · {active.length} variant{active.length === 1 ? "" : "s"}</span></div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3"><span className="text-sm font-semibold tabular-nums">{prices.length ? `${Math.min(...prices) !== Math.max(...prices) ? "From " : ""}${formatPrice(Math.min(...prices))}` : "No active price"}</span><span className="flex items-center gap-2 text-xs font-medium text-marine-700">Edit product<AdminIcon name="arrow" className="h-4 w-4" /></span></div>
+              </Link>
+            </li>;
+          })}
+        </ul>
+        <div className="hidden @min-[48rem]:block"><Table>
           <thead className="border-b border-line">
             <tr>
               <th className={th}>Product</th>
@@ -154,16 +192,11 @@ export default async function ProductsPage({ searchParams }: PageProps<"/admin/p
               );
             })}
           </tbody>
-        </Table>
+        </Table></div>
+        </>
       )}
 
-      {pages > 1 && (
-        <nav aria-label="Pagination" className="mt-5 flex items-center justify-between text-sm">
-          {page > 1 ? <Link href={link(page - 1)} className="font-medium text-marine-700 underline">← Previous</Link> : <span />}
-          <span className="text-muted">Page {page} of {pages}</span>
-          {page < pages ? <Link href={link(page + 1)} className="font-medium text-marine-700 underline">Next →</Link> : <span />}
-        </nav>
-      )}
+      {!error && <Pagination page={page} pageSize={PAGE_SIZE} total={total} noun="products" href={link} />}
     </>
   );
 }

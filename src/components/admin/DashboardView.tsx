@@ -24,7 +24,7 @@ export type DashboardData = {
 export function DashboardView({ name, data: d }: { name: string; data: DashboardData }) {
   const attention: { label: string; value: number; href: string; icon: AdminIconName; tone: string }[] = [
     { label: "Awaiting confirmation", value: d.awaiting_confirmation, href: "/admin/orders?status=pending", icon: "clock", tone: "bg-gold-100 text-gold-700" },
-    { label: "Ready to pack or send", value: d.awaiting_dispatch, href: "/admin/orders?status=confirmed", icon: "products", tone: "bg-marine-50 text-marine-700" },
+    { label: "Ready to pack or send", value: d.awaiting_dispatch, href: "/admin/orders?queue=dispatch", icon: "products", tone: "bg-marine-50 text-marine-700" },
     { label: "Out for delivery", value: d.out_for_delivery, href: "/admin/orders?status=out_for_delivery", icon: "delivery", tone: "bg-marine-50 text-marine-700" },
     { label: "Variants running low", value: d.low_stock.length, href: "/admin/inventory?show=low", icon: "inventory", tone: d.low_stock.length > 0 ? "bg-danger-50 text-danger-700" : "bg-success-50 text-success-700" },
   ];
@@ -33,6 +33,17 @@ export function DashboardView({ name, data: d }: { name: string; data: Dashboard
     <>
       <PageHeader title={`Welcome back, ${name.split(/\s+/).filter(Boolean)[0] || "there"}`} description="Here’s what’s happening with your store."
         actions={<><LinkButton href="/admin/orders/new" icon="plus">Record an order</LinkButton><LinkButton href="/admin/products/new" variant="primary" icon="plus">Add product</LinkButton></>} />
+
+      <section aria-labelledby="admin-queue-heading" className="mb-8">
+        <div className="mb-3"><h2 id="admin-queue-heading" className="text-sm font-semibold text-foreground">Needs your attention</h2><p className="mt-1 text-xs text-muted">Your current order queue and stock, across all dates.</p></div>
+        <ul className="grid gap-1 rounded-2xl border border-line bg-white p-2 @min-[30rem]:grid-cols-2 @min-[62rem]:grid-cols-4">{attention.map(item => <li key={item.label}>
+          <Link href={item.href} className="group flex min-h-20 items-center gap-3 rounded-xl px-3 py-4 transition-colors hover:bg-surface">
+            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${item.tone}`}><AdminIcon name={item.icon} className="h-[18px] w-[18px]" /></span>
+            <span className="min-w-0 flex-1"><span className="block text-xl font-semibold tabular-nums tracking-tight text-foreground">{item.value}{item.icon === "inventory" && item.value === 10 ? "+" : ""}</span><span className="mt-1 block text-xs font-medium leading-relaxed text-muted">{item.label}</span></span>
+            <AdminIcon name="chevron" className="h-3.5 w-3.5 shrink-0 text-muted/70 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </li>)}</ul>
+      </section>
 
       <div className="admin-overview-toolbar">
         <div><h2 className="text-sm font-semibold text-foreground">Store performance</h2><p className="mt-1 text-xs text-muted">A closer look at the last {d.days} days.</p></div>
@@ -45,21 +56,9 @@ export function DashboardView({ name, data: d }: { name: string; data: Dashboard
         <StatTile label="Average order value" value={formatPrice(d.average_order)} icon="analytics" hint="Across orders in this period" />
       </section>
 
-      <div className="grid items-start gap-5 @min-[54rem]:grid-cols-[minmax(0,1.85fr)_minmax(17rem,1fr)]">
-        <Card className="order-2 @min-[54rem]:order-1" title="Sales over time" description={`Daily booked sales for the last ${d.days} days.`} actions={<span className="flex items-center gap-1.5 text-[11px] text-muted"><span className="h-2 w-2 rounded-full bg-marine-700" aria-hidden="true" /> Sales</span>}>
+        <Card title="Sales over time" description={`Daily booked sales for the last ${d.days} days.`} actions={<span className="flex items-center gap-1.5 text-[11px] text-muted"><span className="h-2 w-2 rounded-full bg-marine-700" aria-hidden="true" /> Sales</span>}>
           <RevenueChart data={d.daily} title={`Sales per day, last ${d.days} days`} />
         </Card>
-        <Card className="order-1 @min-[54rem]:order-2" title="Needs your attention" description="Your current order queue and stock.">
-          <ul className="-mx-2 divide-y divide-line/70">{attention.map(item => <li key={item.label}>
-            <Link href={item.href} className="group flex min-h-17 items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-surface">
-              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${item.tone}`}><AdminIcon name={item.icon} className="h-[18px] w-[18px]" /></span>
-              <span className="min-w-0 flex-1 text-xs font-medium leading-relaxed text-muted">{item.label}</span>
-              <span className="text-lg font-semibold tabular-nums tracking-tight text-foreground">{item.value}</span>
-              <AdminIcon name="chevron" className="h-3.5 w-3.5 shrink-0 text-muted/70 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </li>)}</ul>
-        </Card>
-      </div>
 
       <div className="mt-5 grid gap-5 @min-[44rem]:grid-cols-2">
         <Card title="Best sellers" description="The products your customers are choosing." actions={<Link href="/admin/analytics" className="admin-text-link">Analytics <AdminIcon name="arrow" className="h-3.5 w-3.5" /></Link>}>

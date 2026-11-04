@@ -7,8 +7,8 @@ import { AdminIcon } from "./AdminIcon";
 
 const labels: Record<string, string> = {
   orders: "Orders", products: "Products", inventory: "Inventory", discounts: "Discounts",
-  categories: "Categories & specs", brands: "Brands", homepage: "Homepage", workspace: "Members",
-  delivery: "Delivery zones", analytics: "Analytics", staff: "Staff", account: "Your account",
+  categories: "Categories & specs", brands: "Brands", homepage: "Homepage", workspace: "Workspace",
+  delivery: "Delivery settings", analytics: "Analytics", staff: "Staff", account: "Your account",
 };
 
 export function AdminTopbar({ name, role }: { name: string; role: Role }) {
@@ -16,7 +16,8 @@ export function AdminTopbar({ name, role }: { name: string; role: Role }) {
   const segments = pathname.split("/").filter(Boolean).slice(1);
   const section = segments[0];
   const title = labels[section] ?? "Overview";
-  const contextualSearch = role === "editor"
+  const hasPageSearch = segments.length === 1 && ["orders", "products", "inventory"].includes(section);
+  const contextualSearch = role === "editor" || hasPageSearch
     ? null
     : section === "orders"
       ? { action: "/admin/orders", placeholder: "Search orders, customers…" }

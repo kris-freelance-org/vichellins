@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { Badge, buttonStyles, EmptyState, inputClass, PageHeader } from "@/components/admin/ui";
+import Form from "next/form";
+import { FilterSubmit } from "@/components/admin/FilterSubmit";
+import { redirect } from "next/navigation";
+import { ActiveFilters, Pagination } from "@/components/admin/ListTools";
+import { LoadError } from "@/components/admin/LoadError";
+import { Badge, EmptyState, inputClass, LinkButton, Notice, PageHeader } from "@/components/admin/ui";
 import { COMMERCE, requireStaff } from "@/lib/admin/auth";
 import { loadOptionOrder, variantLabel } from "@/lib/admin/queries";
 import { dateTime } from "@/lib/admin/util";
@@ -32,7 +37,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
   await requireStaff(COMMERCE);
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim().slice(0, 60) : "";
-  const filter = typeof params.show === "string" ? params.show : "";
+  const filter = typeof params.show === "string" && ["low", "out"].includes(params.show) ? params.show : "";
   const page = Math.max(1, Number.parseInt(typeof params.page === "string" ? params.page : "1", 10) || 1);
 
   const supabase = await createClient();
@@ -51,9 +56,12 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
       query = query.or(`sku.ilike.%${safe}%${ids.length ? `,product_id.in.(${ids.join(",")})` : ""}`);
     }
   }
-  const { data } = await query;
+  const { data, error } = await query;
   let rows = (data ?? []) as unknown as VariantRow[];
+  const limited = rows.length === 1000;
+  const allCount = rows.length;
   const lowCount = rows.filter((r) => r.is_active && r.stock <= r.low_stock_threshold).length;
+  const outCount = rows.filter((r) => r.is_active && r.stock === 0).length;
   if (filter === "low") rows = rows.filter((r) => r.is_active && r.stock <= r.low_stock_threshold);
   if (filter === "out") rows = rows.filter((r) => r.is_active && r.stock === 0);
 
@@ -70,7 +78,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
           .in("variant_id", shown.map((r) => r.id))
           .order("created_at", { ascending: false })
           .limit(600)
-      : Promise.resolve({ data: [] }),
+      : Promise.resolve({ data: [], error: null }),
   ]);
   const history = new Map<string, { delta: number; reason: string; note: string | null; created_at: string }[]>();
   for (const m of movementsResult.data ?? []) {
@@ -85,6 +93,11 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
     const s = next.toString();
     return `/admin/inventory${s ? `?${s}` : ""}`;
   };
+  if (!error && page > pages) redirect(link({ page: pages > 1 ? String(pages) : undefined }));
+  const filters = [
+    ...(q ? [{ label: `Search: ${q}`, removeHref: link({ q: undefined }) }] : []),
+    ...(filter ? [{ label: filter === "low" ? "Low stock" : "Out of stock", removeHref: link({ show: undefined }) }] : []),
+  ];
 
   return (
     <>
@@ -93,26 +106,30 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
         description="Every stock change is logged with who made it and why. Sales and cancellations adjust stock automatically."
       />
 
-      <nav aria-label="Stock filter" className="mb-4 flex flex-wrap gap-2">
-        {[["", "All"], ["low", `Low stock (${lowCount})`], ["out", "Out of stock"]].map(([value, text]) => (
+      <nav aria-label="Stock filter" className="admin-status-tabs mb-4">
+        {[["", `All${error ? "" : ` (${allCount}${limited ? "+" : ""})`}`], ["low", `Low stock${error ? "" : ` (${lowCount})`}`], ["out", `Out of stock${error ? "" : ` (${outCount})`}`]].map(([value, text]) => (
           <Link key={value || "all"} href={link({ show: value || undefined, page: undefined })} aria-current={filter === value ? "page" : undefined}
-            className={`rounded-full px-3.5 py-1.5 text-sm font-medium ${filter === value ? "bg-marine-700 text-white" : "bg-white text-marine-900 ring-1 ring-line hover:ring-marine-700"}`}>
+            className={`inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-xl border px-3.5 py-2 text-xs font-medium ${filter === value ? "border-marine-700 bg-marine-700 text-white" : "border-line bg-white text-muted hover:border-marine-200 hover:text-marine-700"}`}>
             {text}
           </Link>
         ))}
       </nav>
 
-      <form className="admin-filterbar mb-5 flex flex-wrap items-end gap-3" role="search">
+      <Form action="/admin/inventory" key={[q, filter].join(":")} className="admin-filterbar mb-5 flex flex-wrap items-end gap-3" role="search" aria-label="Filter inventory">
         {filter && <input type="hidden" name="show" value={filter} />}
         <div className="min-w-0 basis-full flex-1 sm:basis-56">
           <label htmlFor="q" className="text-sm font-medium text-marine-900">Search</label>
-          <input id="q" name="q" defaultValue={q} placeholder="Product name or SKU" className={inputClass} />
+          <input id="q" name="q" type="search" defaultValue={q} placeholder="Product name or SKU" className={inputClass} />
         </div>
-        <button type="submit" className={buttonStyles.secondary}>Search</button>
-      </form>
+        <FilterSubmit label="Search" />
+      </Form>
+      <ActiveFilters filters={filters} clearHref="/admin/inventory" />
+      {limited && <Notice tone="gold">Showing the first 1,000 matching variants, starting with the lowest stock. Search by product name or SKU to narrow the list. Stock counts apply to this selection.</Notice>}
+      {movementsResult.error && <Notice tone="gold">Recent stock changes couldn&apos;t be loaded. Stock quantities are still shown below.</Notice>}
 
-      {shown.length === 0 ? (
-        <EmptyState title="Nothing to show" body={q || filter ? "Try a different search or filter." : "Add products with variants and they will appear here."} />
+      {error ? <LoadError subject="your inventory" /> : shown.length === 0 ? (
+        <EmptyState title={q || filter ? "No variants match these filters" : "No inventory yet"} body={q || filter ? "Try another product name or SKU, or clear the filters." : "Add a product with variants to start tracking stock."}
+          action={q || filter ? <LinkButton href="/admin/inventory">Clear filters</LinkButton> : <LinkButton href="/admin/products/new" icon="plus">Add product</LinkButton>} />
       ) : (
         <ul className="space-y-3">
           {shown.map((v) => {
@@ -123,7 +140,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
             return (
               <li key={v.id} className="rounded-2xl border border-line bg-white p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
+                  <div className="min-w-0 break-words [overflow-wrap:anywhere]">
                     <Link href={`/admin/products/${v.product_id}`} className="font-semibold text-marine-900 hover:underline">{v.product.name}</Link>
                     {label && <span className="text-marine-900"> · {label}</span>}
                     <p className="text-xs text-muted">{v.sku}{!v.is_active && " · inactive"}{v.product.status === "draft" && " · draft product"}</p>
@@ -134,7 +151,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
                   </div>
                 </div>
                 <details className="mt-3">
-                  <summary className="cursor-pointer text-sm font-medium text-marine-700">Adjust stock and history</summary>
+                  <summary className="min-h-11 cursor-pointer content-center rounded-lg text-sm font-medium text-marine-700">Adjust stock and view history</summary>
                   <div className="mt-4 space-y-4 border-t border-line pt-4">
                     <AdjustForm variantId={v.id} />
                     {moves.length > 0 && (
@@ -159,13 +176,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
         </ul>
       )}
 
-      {pages > 1 && (
-        <nav aria-label="Pagination" className="mt-5 flex items-center justify-between text-sm">
-          {page > 1 ? <Link href={link({ page: page - 1 === 1 ? undefined : String(page - 1) })} className="font-medium text-marine-700 underline">← Previous</Link> : <span />}
-          <span className="text-muted">Page {page} of {pages}</span>
-          {page < pages ? <Link href={link({ page: String(page + 1) })} className="font-medium text-marine-700 underline">Next →</Link> : <span />}
-        </nav>
-      )}
+      {!error && <Pagination page={page} pageSize={PAGE_SIZE} total={total} noun="variants" href={p => link({ page: p > 1 ? String(p) : undefined })} />}
     </>
   );
 }

@@ -238,6 +238,11 @@ body {
 .admin-filterbar > div { min-width: 0; max-width: 100%; }
 .admin-filterbar label { font-size: 12px; }
 .admin-filterbar select { min-width: 120px; }
+.admin-status-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 3px 3px 8px; overscroll-behavior-x: contain; scrollbar-width: thin; }
+.admin-filterbar > div:not(:first-of-type) { flex: 1 1 140px; }
+@media (min-width: 640px) {
+  .admin-filterbar > div:not(:first-of-type) { flex: 0 1 200px; }
+}
 .admin-shell :focus-visible, .admin-login :focus-visible { outline-color: var(--color-marine-700); outline-offset: 3px; }
 
 .admin-login { display: grid; min-height: 100dvh; background: #fcfcfe; }

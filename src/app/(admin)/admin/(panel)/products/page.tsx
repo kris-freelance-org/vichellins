@@ -63,13 +63,13 @@ export default async function ProductsPage({ searchParams }: PageProps<"/admin/p
         description={`${total} product${total === 1 ? "" : "s"}`}
         actions={
           <>
-            <LinkButton href="/admin/products/import">Bulk import</LinkButton>
-            <LinkButton href="/admin/products/new" variant="primary">Add product</LinkButton>
+            <LinkButton href="/admin/products/import" icon="download">Bulk import</LinkButton>
+            <LinkButton href="/admin/products/new" variant="primary" icon="plus">Add product</LinkButton>
           </>
         }
       />
 
-      <form className="mb-5 flex flex-wrap items-end gap-3" role="search">
+      <form className="admin-filterbar mb-5 flex flex-wrap items-end gap-3" role="search">
         <div className="min-w-0 basis-full flex-1 sm:basis-48">
           <label htmlFor="q" className="text-sm font-medium text-marine-900">Search</label>
           <input id="q" name="q" defaultValue={q} placeholder="Product name" className={inputClass} />
@@ -124,9 +124,9 @@ export default async function ProductsPage({ searchParams }: PageProps<"/admin/p
                     <Link href={`/admin/products/${p.id}`} className="flex items-center gap-3">
                       {image ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={image.url} alt="" className="h-10 w-10 rounded-lg bg-surface object-contain" />
+                        <img src={image.url} alt="" className="h-12 w-12 shrink-0 rounded-xl border border-line bg-surface p-1 object-contain" />
                       ) : (
-                        <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface text-xs text-muted">–</span>
+                        <span aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-xs text-muted">–</span>
                       )}
                       <span>
                         <span className="block font-medium text-marine-900 hover:underline">{p.name}</span>

@@ -111,7 +111,7 @@ export function RevenueChart({ data, title }: { data: DayPoint[]; title: string 
       </div>
       {!hasSales && <p className="mt-3 text-sm text-muted">No sales in this period yet.</p>}
       <details className="mt-4">
-        <summary className="cursor-pointer text-sm font-medium text-marine-700">View as table</summary>
+        <summary className="min-h-11 cursor-pointer py-3 text-xs font-medium text-marine-700">View as table</summary>
         <div className="mt-2 max-h-64 overflow-y-auto rounded-xl border border-line">
           <table className="w-full text-left text-sm">
             <thead className="sticky top-0 bg-surface text-xs uppercase tracking-wide text-muted">

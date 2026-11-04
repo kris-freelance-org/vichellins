@@ -102,7 +102,7 @@ export default async function InventoryPage({ searchParams }: PageProps<"/admin/
         ))}
       </nav>
 
-      <form className="mb-5 flex flex-wrap items-end gap-3" role="search">
+      <form className="admin-filterbar mb-5 flex flex-wrap items-end gap-3" role="search">
         {filter && <input type="hidden" name="show" value={filter} />}
         <div className="min-w-0 basis-full flex-1 sm:basis-56">
           <label htmlFor="q" className="text-sm font-medium text-marine-900">Search</label>

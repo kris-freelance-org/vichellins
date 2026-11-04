@@ -74,23 +74,23 @@ export default async function OrdersPage({ searchParams }: PageProps<"/admin/ord
       <PageHeader
         title="Orders"
         description={`${total} order${total === 1 ? "" : "s"}${status ? ` · ${status.replace(/_/g, " ")}` : ""}`}
-        actions={<LinkButton href="/admin/orders/new" variant="primary">Record an order</LinkButton>}
+        actions={<LinkButton href="/admin/orders/new" variant="primary" icon="plus">Record an order</LinkButton>}
       />
 
-      <nav aria-label="Order status" className="mb-4 flex flex-wrap gap-2">
+      <nav aria-label="Order status" className="mb-5 flex flex-wrap gap-2">
         {[["", `All (${all})`], ...STATUSES.map((s) => [s, `${s.replace(/_/g, " ")} (${counts[s] ?? 0})`])].map(([value, text]) => (
           <Link
             key={value || "all"}
             href={link({ status: value || undefined, page: undefined })}
             aria-current={status === value ? "page" : undefined}
-            className={`rounded-full px-3.5 py-1.5 text-sm font-medium capitalize ${status === value ? "bg-marine-700 text-white" : "bg-white text-marine-900 ring-1 ring-line hover:ring-marine-700"}`}
+            className={`inline-flex min-h-11 items-center rounded-xl border px-3.5 py-2 text-xs font-medium capitalize transition-colors ${status === value ? "border-marine-700 bg-marine-700 text-white" : "border-line bg-white text-muted hover:border-marine-200 hover:text-marine-700"}`}
           >
             {text}
           </Link>
         ))}
       </nav>
 
-      <form className="mb-5 flex flex-wrap items-end gap-3" role="search">
+      <form className="admin-filterbar mb-5 flex flex-wrap items-end gap-3" role="search">
         {status && <input type="hidden" name="status" value={status} />}
         <div className="min-w-0 basis-full flex-1 sm:basis-56">
           <label htmlFor="q" className="text-sm font-medium text-marine-900">Search</label>

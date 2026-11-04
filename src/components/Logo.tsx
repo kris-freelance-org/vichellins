@@ -15,18 +15,20 @@ export function Logo({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   inverted = false,
   className = "h-10 w-auto",
+  href = "/",
 }: {
   inverted?: boolean;
   className?: string;
+  href?: string;
 }) {
   return (
-    <Link href="/" className="inline-flex min-h-11 shrink-0 items-center" aria-label={`${store.name} home`}>
+    <Link href={href} className="inline-flex min-h-11 shrink-0 items-center" aria-label={`${store.name} ${href === "/admin" ? "admin" : "home"}`}>
       <Image
         src="/vichellins-logo.png"
         alt={store.name}
         width={1080}
         height={369}
-        priority
+        preload
         className={className}
       />
     </Link>

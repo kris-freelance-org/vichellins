@@ -2,7 +2,7 @@
 
 import { ActionForm, SubmitButton } from "@/components/admin/forms";
 import { inputClass } from "@/components/admin/ui";
-import { saveInternalNotes, setOrderStatus, setPaymentStatus } from "../actions";
+import { confirmPayment, saveInternalNotes, setOrderStatus, setPaymentStatus } from "../actions";
 
 export function StatusActions({
   id,
@@ -53,6 +53,21 @@ export function StatusActions({
         )}
       </div>
       {isDelivered && <p className="text-xs text-muted">Refunding does not add the item back to stock.</p>}
+    </ActionForm>
+  );
+}
+
+export function ConfirmPaymentButton({ id, method }: { id: string; method: string }) {
+  const label = method === "cod" ? "Confirm delivery fee" : "Confirm payment";
+  return (
+    <ActionForm action={confirmPayment} className="space-y-3">
+      <input type="hidden" name="id" value={id} />
+      <p className="text-sm text-muted">
+        {method === "cod"
+          ? "The shopper transferred the delivery fee upfront. Confirming approves the order; the rest is collected on delivery."
+          : "The shopper transferred the full amount. Confirming marks payment as received and approves the order."}
+      </p>
+      <SubmitButton pendingText="Confirming…">{label}</SubmitButton>
     </ActionForm>
   );
 }

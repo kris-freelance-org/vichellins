@@ -5,7 +5,7 @@ import { COMMERCE, requireStaff } from "@/lib/admin/auth";
 import { dateTime, STATUS_FLOW, toWhatsApp } from "@/lib/admin/util";
 import { formatPrice } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import { NotesForm, PaymentForm, StatusActions } from "./forms";
+import { ConfirmPaymentButton, NotesForm, PaymentForm, StatusActions } from "./forms";
 
 export const metadata = { title: "Order" };
 
@@ -102,6 +102,12 @@ export default async function OrderPage({ params, searchParams }: PageProps<"/ad
         </div>
 
         <div className="space-y-6">
+          {order.status === "pending" && (
+            <Card title="Confirm payment">
+              <ConfirmPaymentButton id={order.id} method={order.payment_method} />
+            </Card>
+          )}
+
           <Card title="Update order">
             <StatusActions id={order.id} next={flow.next} canCancel={flow.cancel} isDelivered={order.status === "delivered"} />
           </Card>

@@ -31,6 +31,50 @@ export async function setOrderStatus(_prev: ActionState, form: FormData): Promis
   return done(`Order marked as ${status.replace(/_/g, " ")}.`);
 }
 
+/**
+ * One-click confirmation for an order sitting on 'pending' / 'unpaid':
+ *   - For bank transfer orders, marks the full payment as received.
+ *   - For pay-on-delivery orders, the shopper only transferred the delivery fee,
+ *     so payment_status stays unpaid and a timeline note records the receipt.
+ *   - Advances the order from 'pending' to 'confirmed' so dispatch can start.
+ */
+export async function confirmPayment(_prev: ActionState, form: FormData): Promise<ActionState> {
+  await requireStaff(COMMERCE);
+  const id = formString(form, "id");
+  if (!id) return fail("Missing order id.");
+
+  const supabase = await createClient();
+  const { data: order, error: lookupError } = await supabase
+    .from("orders")
+    .select("status, payment_method, payment_status")
+    .eq("id", id)
+    .maybeSingle();
+  if (lookupError) return fail(friendlyError(lookupError));
+  if (!order) return fail("That order no longer exists.");
+
+  const isTransfer = order.payment_method === "transfer";
+  const note = isTransfer ? "Payment confirmed." : "Delivery fee received.";
+
+  if (isTransfer && order.payment_status !== "paid") {
+    const { error } = await supabase.from("orders").update({ payment_status: "paid" }).eq("id", id);
+    if (error) return fail(friendlyError(error));
+  }
+
+  if (order.status === "pending") {
+    const { error } = await supabase.rpc("set_order_status", {
+      p_order_id: id,
+      p_status: "confirmed",
+      p_note: note,
+    });
+    if (error) return fail(friendlyError(error));
+  }
+
+  revalidatePath(`/admin/orders/${id}`);
+  revalidatePath("/admin/orders");
+  revalidatePath("/admin");
+  return done(isTransfer ? "Payment confirmed and order approved." : "Delivery fee receipt noted and order approved.");
+}
+
 export async function setPaymentStatus(_prev: ActionState, form: FormData): Promise<ActionState> {
   await requireStaff(COMMERCE);
   const id = formString(form, "id");

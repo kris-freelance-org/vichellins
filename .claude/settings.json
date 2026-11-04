@@ -8,7 +8,9 @@
       "Bash(git update-ref *)",
       "Bash(git stash *)",
       "Bash(npx --no-install eslint src/app/\\\\\\(admin\\\\\\)/admin/\\\\\\(panel\\\\\\)/delivery src/app/\\\\\\(admin\\\\\\)/admin/\\\\\\(panel\\\\\\)/products src/app/\\\\\\(site\\\\\\)/checkout src/lib/admin/product-payload.ts)",
-      "Bash(npx --no-install tsc --noEmit)"
+      "Bash(npx --no-install tsc --noEmit)",
+      "Bash(npx --no-install eslint \"src/app/\\(site\\)/checkout\" \"src/app/\\(admin\\)/admin/\\(panel\\)/orders\")",
+      "Bash(node supabase/tests/migration.test.mjs)"
     ]
   }
 }

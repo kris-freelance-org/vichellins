@@ -2,7 +2,7 @@
 
 import { ActionForm, SubmitButton } from "@/components/admin/forms";
 import { Field, inputClass } from "@/components/admin/ui";
-import { addMember, cancelSubscription, recordSubscription, removeMember } from "./actions";
+import { addMember, cancelBooking, cancelSubscription, confirmBooking, markNoShow, recordSubscription, removeMember } from "./actions";
 
 export function AddMemberForm() {
   return (
@@ -60,6 +60,45 @@ export function CancelButton({ id, memberName }: { id: string; memberName: strin
     <ActionForm action={cancelSubscription}>
       <input type="hidden" name="id" value={id} />
       <SubmitButton variant="secondary" pendingText="Cancelling…" confirm={`Cancel ${memberName}'s current subscription?`}>Cancel subscription</SubmitButton>
+    </ActionForm>
+  );
+}
+
+export function ConfirmBookingForm({ id, defaultAmount = 5000 }: { id: string; defaultAmount?: number }) {
+  return (
+    <ActionForm action={confirmBooking} className="grid gap-3 @min-[32rem]:grid-cols-[minmax(0,110px)_minmax(0,140px)_auto] @min-[32rem]:items-end">
+      <input type="hidden" name="id" value={id} />
+      <Field label="Amount (₦)" htmlFor={`b-amt-${id}`}>
+        <input id={`b-amt-${id}`} name="amount" inputMode="numeric" required defaultValue={defaultAmount} className={inputClass} />
+      </Field>
+      <Field label="Paid with" htmlFor={`b-method-${id}`}>
+        <select id={`b-method-${id}`} name="payment_method" defaultValue="cash" className={inputClass}>
+          <option value="cash">Cash</option>
+          <option value="transfer">Bank transfer</option>
+          <option value="pos">POS</option>
+          <option value="card">Card</option>
+          <option value="other">Other</option>
+        </select>
+      </Field>
+      <SubmitButton pendingText="Confirming…">Confirm payment</SubmitButton>
+    </ActionForm>
+  );
+}
+
+export function CancelBookingButton({ id, name }: { id: string; name: string }) {
+  return (
+    <ActionForm action={cancelBooking}>
+      <input type="hidden" name="id" value={id} />
+      <SubmitButton variant="secondary" pendingText="Cancelling…" confirm={`Cancel ${name}'s booking?`}>Cancel</SubmitButton>
+    </ActionForm>
+  );
+}
+
+export function NoShowButton({ id, name }: { id: string; name: string }) {
+  return (
+    <ActionForm action={markNoShow}>
+      <input type="hidden" name="id" value={id} />
+      <SubmitButton variant="secondary" pendingText="Marking…" confirm={`Mark ${name} as a no-show?`}>No-show</SubmitButton>
     </ActionForm>
   );
 }

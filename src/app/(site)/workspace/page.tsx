@@ -48,8 +48,8 @@ export default function WorkspacePage() {
               Drop in for the day, or settle in for the month. Fast Wi-Fi, dedicated desks, and a device bar stocked with the phones, laptops and audio we sell.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/contact" className="inline-flex min-h-11 items-center justify-center rounded-full bg-gold-400 px-6 text-sm font-semibold text-marine-900 hover:bg-gold-300">
-                Book a visit
+              <Link href="/workspace/book" className="inline-flex min-h-11 items-center justify-center rounded-full bg-gold-400 px-6 text-sm font-semibold text-marine-900 hover:bg-gold-300">
+                Book a day
               </Link>
               <a href={whatsappLink("Hi, I'd like to use the workspace. Could you share availability?")} className="inline-flex min-h-11 items-center justify-center rounded-full border border-white/30 px-6 text-sm font-semibold text-white hover:bg-white/10">
                 Chat on WhatsApp
@@ -113,8 +113,8 @@ export default function WorkspacePage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/contact" className={`mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-full px-5 text-sm font-semibold ${i === 2 ? "bg-gold-400 text-marine-900 hover:bg-gold-300" : "border border-marine-700 text-marine-700 hover:bg-marine-50"}`}>
-                Reserve a spot
+              <Link href={i === 0 ? "/workspace/book" : "/contact"} className={`mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-full px-5 text-sm font-semibold ${i === 2 ? "bg-gold-400 text-marine-900 hover:bg-gold-300" : "border border-marine-700 text-marine-700 hover:bg-marine-50"}`}>
+                {i === 0 ? "Book a day" : "Reserve a spot"}
               </Link>
             </div>
           ))}

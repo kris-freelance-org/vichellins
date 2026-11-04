@@ -3,7 +3,25 @@ import { COMMERCE, requireStaff } from "@/lib/admin/auth";
 import { dateOnly } from "@/lib/admin/util";
 import { formatPrice } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
-import { AddMemberForm, CancelButton, RecordPaymentForm, RemoveMemberButton } from "./forms";
+import {
+  AddMemberForm,
+  CancelBookingButton,
+  CancelButton,
+  ConfirmBookingForm,
+  NoShowButton,
+  RecordPaymentForm,
+  RemoveMemberButton,
+} from "./forms";
+
+type Booking = {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  booking_date: string;
+  notes: string;
+  created_at: string;
+};
 
 export const metadata = { title: "Workspace" };
 
@@ -29,6 +47,33 @@ type Member = {
   workspace_subscriptions: Sub[];
 };
 
+function BookingCard({ booking }: { booking: Booking }) {
+  const date = new Date(`${booking.booking_date}T00:00:00`);
+  return (
+    <li className="rounded-xl border border-line bg-white p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="font-semibold text-marine-900">{booking.name}</p>
+          <p className="text-xs text-muted">
+            {booking.phone || "No phone"}
+            {booking.email ? ` · ${booking.email}` : ""}
+          </p>
+          <p className="mt-1 text-xs text-muted">Booked for {dateOnly.format(date)}</p>
+          {booking.notes && <p className="mt-1 text-xs text-marine-900">“{booking.notes}”</p>}
+        </div>
+        <Badge tone="gold">Pending</Badge>
+      </div>
+      <div className="mt-4 border-t border-line pt-4">
+        <ConfirmBookingForm id={booking.id} />
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3">
+        <CancelBookingButton id={booking.id} name={booking.name} />
+        <NoShowButton id={booking.id} name={booking.name} />
+      </div>
+    </li>
+  );
+}
+
 function statusOf(sub: Sub | undefined, today: string): { label: string; tone: "green" | "gold" | "red" | "neutral"; detail: string } {
   if (!sub) return { label: "No subscription", tone: "neutral", detail: "Record a payment to activate." };
   if (sub.status === "cancelled") return { label: "Cancelled", tone: "red", detail: `Was ${sub.plan}` };
@@ -41,13 +86,30 @@ function statusOf(sub: Sub | undefined, today: string): { label: string; tone: "
 export default async function WorkspacePage() {
   await requireStaff(COMMERCE);
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("workspace_members")
-    .select("id, name, phone, email, notes, created_at, workspace_subscriptions(id, plan, amount, payment_method, start_date, end_date, status, notes, created_at)")
-    .order("created_at", { ascending: false });
-
-  const members = (data ?? []) as unknown as Member[];
   const today = new Date().toISOString().slice(0, 10);
+  const horizon = new Date();
+  horizon.setDate(horizon.getDate() + 14);
+  const horizonIso = horizon.toISOString().slice(0, 10);
+
+  const [{ data: memberRows }, { data: bookingRows }] = await Promise.all([
+    supabase
+      .from("workspace_members")
+      .select("id, name, phone, email, notes, created_at, workspace_subscriptions(id, plan, amount, payment_method, start_date, end_date, status, notes, created_at)")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("workspace_bookings")
+      .select("id, name, phone, email, booking_date, notes, created_at")
+      .eq("status", "pending")
+      .gte("booking_date", today)
+      .lte("booking_date", horizonIso)
+      .order("booking_date")
+      .order("created_at"),
+  ]);
+
+  const members = (memberRows ?? []) as unknown as Member[];
+  const bookings = (bookingRows ?? []) as Booking[];
+  const bookingsToday = bookings.filter((b) => b.booking_date === today);
+  const bookingsUpcoming = bookings.filter((b) => b.booking_date > today);
 
   for (const m of members) {
     m.workspace_subscriptions.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
@@ -68,7 +130,11 @@ export default async function WorkspacePage() {
         description="Walk-in guests and their subscription payments. Record payments taken in person or by transfer."
       />
 
-      <div className="mb-6 grid gap-3 text-sm @min-[42rem]:grid-cols-3">
+      <div className="mb-6 grid gap-3 text-sm @min-[42rem]:grid-cols-4">
+        <div className="rounded-xl bg-white p-4 ring-1 ring-line">
+          <p className="text-xs uppercase tracking-wide text-muted">Bookings today</p>
+          <p className="mt-1 text-2xl font-semibold text-marine-900">{bookingsToday.length}</p>
+        </div>
         <div className="rounded-xl bg-white p-4 ring-1 ring-line">
           <p className="text-xs uppercase tracking-wide text-muted">Total members</p>
           <p className="mt-1 text-2xl font-semibold text-marine-900">{members.length}</p>
@@ -84,6 +150,23 @@ export default async function WorkspacePage() {
       </div>
 
       <div className="space-y-6">
+        <Card
+          title={`Today's bookings${bookingsToday.length ? ` (${bookingsToday.length})` : ""}`}
+          description="Day passes booked through the website for today. Confirm payment when the guest arrives."
+        >
+          {bookingsToday.length === 0 ? (
+            <p className="text-sm text-muted">No bookings for today yet.</p>
+          ) : (
+            <ul className="space-y-4">{bookingsToday.map((b) => <BookingCard key={b.id} booking={b} />)}</ul>
+          )}
+        </Card>
+
+        {bookingsUpcoming.length > 0 && (
+          <Card title={`Upcoming bookings (${bookingsUpcoming.length})`} description="Next 14 days, excluding today.">
+            <ul className="space-y-4">{bookingsUpcoming.map((b) => <BookingCard key={b.id} booking={b} />)}</ul>
+          </Card>
+        )}
+
         <Card title="Add a walk-in guest" description="Capture the person first; record their payment next.">
           <AddMemberForm />
         </Card>

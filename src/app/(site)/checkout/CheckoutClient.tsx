@@ -410,7 +410,7 @@ export function CheckoutClient({
           </fieldset>
         </div>
 
-        <aside className="min-w-0 h-fit rounded-3xl bg-surface p-5 sm:p-6 lg:sticky lg:top-24">
+        <aside className="min-w-0 h-fit rounded-3xl bg-surface p-5 sm:p-6 lg:sticky lg:top-36">
           <h2 className="text-lg font-semibold text-marine-900">Order summary</h2>
           <ul className="mt-4 space-y-3 text-sm">
             {items.map((i) => (

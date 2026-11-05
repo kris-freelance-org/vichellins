@@ -1,24 +1,29 @@
 "use client";
 
 import { ActionForm, SubmitButton } from "@/components/admin/forms";
-import { inputClass } from "@/components/admin/ui";
+import { inputClass, td } from "@/components/admin/ui";
 import { deleteBrand, updateBrand } from "./actions";
 
 export function BrandRow({ id, name, productCount }: { id: string; name: string; productCount: number }) {
   return (
-    <li className="rounded-xl border border-line bg-white p-4">
-      <div className="flex flex-wrap items-end gap-3">
-        <ActionForm action={updateBrand} className="flex flex-1 flex-wrap items-end gap-3">
+    <tr>
+      <td className={td}>
+        <ActionForm action={updateBrand} className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="id" value={id} />
-          <div className="min-w-0 basis-full flex-1 sm:basis-48">
-            <label htmlFor={`brand-${id}`} className="sr-only">
-              Brand name
-            </label>
-            <input id={`brand-${id}`} name="name" defaultValue={name} required className={`${inputClass} mt-0`} />
-          </div>
+          <label htmlFor={`brand-${id}`} className="sr-only">Brand name</label>
+          <input
+            id={`brand-${id}`}
+            name="name"
+            defaultValue={name}
+            required
+            className={`${inputClass} mt-0 min-w-[160px] flex-1`}
+          />
           <SubmitButton variant="secondary">Save</SubmitButton>
         </ActionForm>
-        <ActionForm action={deleteBrand}>
+      </td>
+      <td className={td}>{productCount}</td>
+      <td className={`${td} text-right`}>
+        <ActionForm action={deleteBrand} className="inline-flex">
           <input type="hidden" name="id" value={id} />
           <SubmitButton
             variant="danger"
@@ -32,10 +37,7 @@ export function BrandRow({ id, name, productCount }: { id: string; name: string;
             Delete
           </SubmitButton>
         </ActionForm>
-      </div>
-      <p className="mt-2 text-xs text-muted">
-        {productCount} product{productCount === 1 ? "" : "s"}
-      </p>
-    </li>
+      </td>
+    </tr>
   );
 }

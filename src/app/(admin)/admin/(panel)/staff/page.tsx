@@ -1,4 +1,4 @@
-import { Card, PageHeader } from "@/components/admin/ui";
+import { Card, EmptyState, PageHeader, Table, th } from "@/components/admin/ui";
 import { requireStaff } from "@/lib/admin/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -42,9 +42,24 @@ export default async function StaffPage() {
         <Card title="Add a team member" description="They get a temporary password to share with them privately.">
           <AddStaffForm />
         </Card>
-        <ul className="space-y-3">
-          {members.map((m) => <StaffRow key={m.id} member={m} isMe={m.id === me.id} />)}
-        </ul>
+        {members.length === 0 ? (
+          <EmptyState title="No staff yet" body="Add team members above. They can sign in once you share the temporary password." />
+        ) : (
+          <Table>
+            <thead className="border-b border-line">
+              <tr>
+                <th className={th}>Name</th>
+                <th className={th}>Email</th>
+                <th className={th}>Role</th>
+                <th className={th}>Status</th>
+                <th className={`${th} text-right`}></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {members.map((m) => <StaffRow key={m.id} member={m} isMe={m.id === me.id} />)}
+            </tbody>
+          </Table>
+        )}
       </div>
     </>
   );

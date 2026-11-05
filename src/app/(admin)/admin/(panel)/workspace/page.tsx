@@ -47,30 +47,48 @@ type Member = {
   workspace_subscriptions: Sub[];
 };
 
-function BookingCard({ booking }: { booking: Booking }) {
+function BookingRow({ booking }: { booking: Booking }) {
   const date = new Date(`${booking.booking_date}T00:00:00`);
   return (
-    <li className="rounded-xl border border-line bg-white p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="font-semibold text-marine-900">{booking.name}</p>
-          <p className="text-xs text-muted">
-            {booking.phone || "No phone"}
-            {booking.email ? ` · ${booking.email}` : ""}
-          </p>
-          <p className="mt-1 text-xs text-muted">Booked for {dateOnly.format(date)}</p>
-          {booking.notes && <p className="mt-1 text-xs text-marine-900">“{booking.notes}”</p>}
-        </div>
-        <Badge tone="gold">Pending</Badge>
-      </div>
-      <div className="mt-4 border-t border-line pt-4">
+    <tr>
+      <td className={td}>
+        <span className="font-medium text-marine-900">{booking.name}</span>
+        {booking.notes && <span className="mt-1 block text-xs text-muted">“{booking.notes}”</span>}
+      </td>
+      <td className={td}>
+        <span className="block text-sm text-marine-900">{booking.phone || <span className="text-muted">—</span>}</span>
+        {booking.email && <span className="block text-xs text-muted">{booking.email}</span>}
+      </td>
+      <td className={td}>{dateOnly.format(date)}</td>
+      <td className={td}>
         <ConfirmBookingForm id={booking.id} />
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3">
-        <CancelBookingButton id={booking.id} name={booking.name} />
-        <NoShowButton id={booking.id} name={booking.name} />
-      </div>
-    </li>
+      </td>
+      <td className={`${td} text-right`}>
+        <div className="flex flex-wrap justify-end gap-2">
+          <CancelBookingButton id={booking.id} name={booking.name} />
+          <NoShowButton id={booking.id} name={booking.name} />
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+function BookingsTable({ bookings }: { bookings: Booking[] }) {
+  return (
+    <Table>
+      <thead className="border-b border-line">
+        <tr>
+          <th className={th}>Guest</th>
+          <th className={th}>Contact</th>
+          <th className={th}>Visit date</th>
+          <th className={th}>Confirm payment</th>
+          <th className={`${th} text-right`}>Other actions</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-line">
+        {bookings.map((b) => <BookingRow key={b.id} booking={b} />)}
+      </tbody>
+    </Table>
   );
 }
 
@@ -157,13 +175,13 @@ export default async function WorkspacePage() {
           {bookingsToday.length === 0 ? (
             <p className="text-sm text-muted">No bookings for today yet.</p>
           ) : (
-            <ul className="space-y-4">{bookingsToday.map((b) => <BookingCard key={b.id} booking={b} />)}</ul>
+            <BookingsTable bookings={bookingsToday} />
           )}
         </Card>
 
         {bookingsUpcoming.length > 0 && (
           <Card title={`Upcoming bookings (${bookingsUpcoming.length})`} description="Next 14 days, excluding today.">
-            <ul className="space-y-4">{bookingsUpcoming.map((b) => <BookingCard key={b.id} booking={b} />)}</ul>
+            <BookingsTable bookings={bookingsUpcoming} />
           </Card>
         )}
 

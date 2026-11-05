@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionForm, SubmitButton } from "@/components/admin/forms";
-import { Field, inputClass } from "@/components/admin/ui";
+import { Field, inputClass, td } from "@/components/admin/ui";
 import { createStaff, removeStaff, resetStaffPassword, setStaffActive, updateStaff } from "./actions";
 
 const roleHelp = {
@@ -29,59 +29,68 @@ export function AddStaffForm() {
 
 export function StaffRow({ member, isMe }: { member: { id: string; name: string; role: string; email: string; isActive: boolean }; isMe: boolean }) {
   return (
-    <li className={`rounded-xl border p-4 ${member.isActive ? "border-line bg-white" : "border-gold-300 bg-gold-50/40"}`}>
-      <details>
-        <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
-          <span>
-            <span className="font-medium text-marine-900">{member.name}{isMe && <span className="ml-2 text-xs font-normal text-muted">(you)</span>}</span>
-            <span className="block text-xs text-muted">{member.email}</span>
-          </span>
-          <span className="flex items-center gap-3 text-sm">
-            {!member.isActive && (
-              <span className="rounded-full bg-gold-100 px-2.5 py-1 text-xs font-medium text-gold-800">Suspended</span>
+    <tr className={member.isActive ? "" : "bg-gold-50/40"}>
+      <td className={td}>
+        <span className="font-medium text-marine-900">{member.name}</span>
+        {isMe && <span className="ml-2 text-xs font-normal text-muted">(you)</span>}
+      </td>
+      <td className={td}>
+        <span className="text-sm text-muted">{member.email || "—"}</span>
+      </td>
+      <td className={td}>
+        <span className="rounded-full bg-marine-50 px-2.5 py-1 text-xs font-medium capitalize text-marine-800">{member.role}</span>
+      </td>
+      <td className={td}>
+        {member.isActive ? (
+          <span className="rounded-full bg-success-50 px-2.5 py-1 text-xs font-medium text-success-800">Active</span>
+        ) : (
+          <span className="rounded-full bg-gold-100 px-2.5 py-1 text-xs font-medium text-gold-800">Suspended</span>
+        )}
+      </td>
+      <td className={`${td} text-right`}>
+        <details className="group inline-block text-left">
+          <summary className="cursor-pointer list-none text-sm font-medium text-marine-700 underline underline-offset-4 [&::-webkit-details-marker]:hidden">
+            Manage
+          </summary>
+          <div className="mt-4 space-y-4 rounded-xl border border-line bg-white p-4">
+            <ActionForm action={updateStaff} className="grid gap-4 sm:grid-cols-[1fr_200px_auto] sm:items-end">
+              <input type="hidden" name="id" value={member.id} />
+              <Field label="Name" htmlFor={`n-${member.id}`}><input id={`n-${member.id}`} name="name" defaultValue={member.name} required className={inputClass} /></Field>
+              <Field label="Role" htmlFor={`r-${member.id}`}>
+                <select id={`r-${member.id}`} name="role" defaultValue={member.role} className={inputClass}>
+                  <option value="staff">Staff</option>
+                  <option value="editor">Editor</option>
+                  <option value="owner">Owner</option>
+                </select>
+              </Field>
+              <SubmitButton variant="secondary">Save</SubmitButton>
+            </ActionForm>
+            {!isMe && (
+              <div className="flex flex-wrap gap-3 border-t border-line pt-4">
+                <ActionForm action={resetStaffPassword}>
+                  <input type="hidden" name="id" value={member.id} />
+                  <SubmitButton variant="secondary" pendingText="Resetting…" confirm={`Reset ${member.name}'s password? Their old password stops working.`}>Reset password</SubmitButton>
+                </ActionForm>
+                <ActionForm action={setStaffActive}>
+                  <input type="hidden" name="id" value={member.id} />
+                  <input type="hidden" name="active" value={member.isActive ? "false" : "true"} />
+                  <SubmitButton
+                    variant={member.isActive ? "secondary" : "primary"}
+                    pendingText={member.isActive ? "Suspending…" : "Reactivating…"}
+                    confirm={member.isActive ? `Suspend ${member.name}? They will be signed out and can't sign in until reactivated.` : undefined}
+                  >
+                    {member.isActive ? "Suspend access" : "Reactivate access"}
+                  </SubmitButton>
+                </ActionForm>
+                <ActionForm action={removeStaff}>
+                  <input type="hidden" name="id" value={member.id} />
+                  <SubmitButton variant="danger" pendingText="Removing…" confirm={`Permanently delete ${member.name}'s account? This can't be undone. Suspend instead if you might restore access later.`}>Delete account</SubmitButton>
+                </ActionForm>
+              </div>
             )}
-            <span className="rounded-full bg-marine-50 px-2.5 py-1 text-xs font-medium capitalize text-marine-800">{member.role}</span>
-            <span className="text-muted underline">Manage</span>
-          </span>
-        </summary>
-        <div className="mt-4 space-y-4 border-t border-line pt-4">
-          <ActionForm action={updateStaff} className="grid gap-4 sm:grid-cols-[1fr_200px_auto] sm:items-end">
-            <input type="hidden" name="id" value={member.id} />
-            <Field label="Name" htmlFor={`n-${member.id}`}><input id={`n-${member.id}`} name="name" defaultValue={member.name} required className={inputClass} /></Field>
-            <Field label="Role" htmlFor={`r-${member.id}`}>
-              <select id={`r-${member.id}`} name="role" defaultValue={member.role} className={inputClass}>
-                <option value="staff">Staff</option>
-                <option value="editor">Editor</option>
-                <option value="owner">Owner</option>
-              </select>
-            </Field>
-            <SubmitButton variant="secondary">Save</SubmitButton>
-          </ActionForm>
-          {!isMe && (
-            <div className="flex flex-wrap gap-3 border-t border-line pt-4">
-              <ActionForm action={resetStaffPassword}>
-                <input type="hidden" name="id" value={member.id} />
-                <SubmitButton variant="secondary" pendingText="Resetting…" confirm={`Reset ${member.name}'s password? Their old password stops working.`}>Reset password</SubmitButton>
-              </ActionForm>
-              <ActionForm action={setStaffActive}>
-                <input type="hidden" name="id" value={member.id} />
-                <input type="hidden" name="active" value={member.isActive ? "false" : "true"} />
-                <SubmitButton
-                  variant={member.isActive ? "secondary" : "primary"}
-                  pendingText={member.isActive ? "Suspending…" : "Reactivating…"}
-                  confirm={member.isActive ? `Suspend ${member.name}? They will be signed out and can't sign in until reactivated.` : undefined}
-                >
-                  {member.isActive ? "Suspend access" : "Reactivate access"}
-                </SubmitButton>
-              </ActionForm>
-              <ActionForm action={removeStaff}>
-                <input type="hidden" name="id" value={member.id} />
-                <SubmitButton variant="danger" pendingText="Removing…" confirm={`Permanently delete ${member.name}'s account? This can't be undone. Suspend instead if you might restore access later.`}>Delete account</SubmitButton>
-              </ActionForm>
-            </div>
-          )}
-        </div>
-      </details>
-    </li>
+          </div>
+        </details>
+      </td>
+    </tr>
   );
 }

@@ -1,4 +1,4 @@
-import { EmptyState, PageHeader } from "@/components/admin/ui";
+import { EmptyState, PageHeader, Table, th } from "@/components/admin/ui";
 import { CONTENT, requireStaff } from "@/lib/admin/auth";
 import { loadBrands } from "@/lib/admin/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -27,11 +27,20 @@ export default async function BrandsPage() {
         {brands.length === 0 ? (
           <EmptyState title="No brands yet" body="Add your first brand above, then pick it when you add products." />
         ) : (
-          <ul className="space-y-3">
-            {brands.map((b) => (
-              <BrandRow key={b.id} id={b.id} name={b.name} productCount={counts.get(b.id) ?? 0} />
-            ))}
-          </ul>
+          <Table>
+            <thead className="border-b border-line">
+              <tr>
+                <th className={th}>Brand</th>
+                <th className={th}>Products</th>
+                <th className={`${th} text-right`}></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {brands.map((b) => (
+                <BrandRow key={b.id} id={b.id} name={b.name} productCount={counts.get(b.id) ?? 0} />
+              ))}
+            </tbody>
+          </Table>
         )}
       </div>
     </>

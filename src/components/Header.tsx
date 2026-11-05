@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTopCategories } from "@/lib/catalog";
+import { getNavCategories } from "@/lib/catalog";
 import { whatsappLink } from "@/lib/config";
 import { CartBadge } from "./CartBadge";
 import { Icon } from "./Icon";
@@ -19,7 +19,7 @@ function SearchForm({ className = "", id = "site-search" }: { className?: string
 }
 
 export async function Header() {
-  const categories = await getTopCategories();
+  const categories = await getNavCategories();
   return (
     <>
       <div className="bg-marine-700 text-white">

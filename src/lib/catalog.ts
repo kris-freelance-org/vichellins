@@ -183,6 +183,9 @@ const fetchFromSupabase = unstable_cache(
       description: c.description ?? "",
       kind: (c.kind as ProductKind) ?? "phone",
       imageUrl: c.image_url ?? undefined,
+      // Default to true so older rows (migration not yet run) still show.
+      showOnHomepage: c.show_on_homepage ?? true,
+      showOnNav: c.show_on_nav ?? true,
     }));
     const kindByCategory = new Map(categories.map((c) => [c.id, c.kind]));
 
@@ -232,6 +235,18 @@ export async function getCategories(): Promise<Category[]> {
 export async function getTopCategories(): Promise<Category[]> {
   const { categories } = await loadCatalog();
   return categories.filter((c) => c.parentId === null);
+}
+
+/** Top-level categories admins want shown on the homepage grid. */
+export async function getHomepageCategories(): Promise<Category[]> {
+  const top = await getTopCategories();
+  return top.filter((c) => c.showOnHomepage !== false);
+}
+
+/** Top-level categories admins want shown in the header and mobile menu. */
+export async function getNavCategories(): Promise<Category[]> {
+  const top = await getTopCategories();
+  return top.filter((c) => c.showOnNav !== false);
 }
 
 export async function getChildCategories(parentId: string): Promise<Category[]> {

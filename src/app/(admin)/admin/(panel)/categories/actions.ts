@@ -38,6 +38,8 @@ export async function createCategory(_prev: ActionState, form: FormData): Promis
     parent_id: formString(form, "parent_id") || null,
     description: formString(form, "description"),
     kind: (PRODUCT_KINDS as readonly string[]).includes(kind) ? kind : "phone",
+    show_on_homepage: form.get("show_on_homepage") === "on",
+    show_on_nav: form.get("show_on_nav") === "on",
     ...(image.url ? { image_url: image.url } : {}),
   });
   if (error) {
@@ -82,6 +84,8 @@ export async function updateCategory(_prev: ActionState, form: FormData): Promis
       description: formString(form, "description"),
       kind: (PRODUCT_KINDS as readonly string[]).includes(kind) ? kind : "phone",
       is_active: form.get("is_active") === "on",
+      show_on_homepage: form.get("show_on_homepage") === "on",
+      show_on_nav: form.get("show_on_nav") === "on",
       sort_order: Number.parseInt(formString(form, "sort_order"), 10) || 0,
       ...(imageChanged ? { image_url: image.url ?? null } : {}),
     })

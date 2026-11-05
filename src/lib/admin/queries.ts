@@ -11,6 +11,8 @@ export type CategoryRow = {
   sort_order: number;
   is_active: boolean;
   image_url: string | null;
+  show_on_homepage: boolean;
+  show_on_nav: boolean;
 };
 
 export type SpecDefRow = {

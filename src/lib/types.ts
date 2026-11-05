@@ -23,6 +23,10 @@ export type Category = {
   description: string;
   kind: ProductKind;
   imageUrl?: string;
+  /** Default true. Only `false` hides the category from the homepage grid. */
+  showOnHomepage?: boolean;
+  /** Default true. Only `false` hides the category from the top nav + mobile menu. */
+  showOnNav?: boolean;
 };
 
 export type Brand = {

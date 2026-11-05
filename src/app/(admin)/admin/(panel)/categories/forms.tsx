@@ -62,6 +62,16 @@ export function AddCategoryForm({ options }: { options: Option[] }) {
           ))}
         </select>
       </Field>
+      <div className="@min-[34rem]:col-span-2 flex flex-wrap gap-5 pt-1">
+        <label className="flex items-center gap-2.5 text-sm text-marine-900">
+          <input type="checkbox" name="show_on_homepage" defaultChecked className="h-4 w-4 accent-marine-700" />
+          Show on homepage
+        </label>
+        <label className="flex items-center gap-2.5 text-sm text-marine-900">
+          <input type="checkbox" name="show_on_nav" defaultChecked className="h-4 w-4 accent-marine-700" />
+          Show in top nav
+        </label>
+      </div>
       <div className="flex items-end">
         <SubmitButton pendingText="Adding…">Add category</SubmitButton>
       </div>
@@ -74,7 +84,19 @@ export function EditCategoryForm({
   options,
   blocked,
 }: {
-  category: { id: string; name: string; slug: string; description: string; kind: string; parent_id: string | null; is_active: boolean; sort_order: number; image_url?: string | null };
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    description: string;
+    kind: string;
+    parent_id: string | null;
+    is_active: boolean;
+    sort_order: number;
+    image_url?: string | null;
+    show_on_homepage: boolean;
+    show_on_nav: boolean;
+  };
   options: Option[];
   blocked: Set<string>;
 }) {
@@ -112,6 +134,16 @@ export function EditCategoryForm({
         <input type="checkbox" name="is_active" defaultChecked={category.is_active} className="h-4 w-4 accent-marine-700" />
         Visible in the shop
       </label>
+      <div className="@min-[34rem]:col-span-2 flex flex-wrap gap-5 pt-1">
+        <label className="flex items-center gap-2.5 text-sm text-marine-900">
+          <input type="checkbox" name="show_on_homepage" defaultChecked={category.show_on_homepage} className="h-4 w-4 accent-marine-700" />
+          Show on homepage
+        </label>
+        <label className="flex items-center gap-2.5 text-sm text-marine-900">
+          <input type="checkbox" name="show_on_nav" defaultChecked={category.show_on_nav} className="h-4 w-4 accent-marine-700" />
+          Show in top nav
+        </label>
+      </div>
       <div className="@min-[34rem]:col-span-2">
         <SubmitButton>Save category</SubmitButton>
       </div>

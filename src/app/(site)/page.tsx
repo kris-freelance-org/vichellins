@@ -4,7 +4,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { CategoryCard } from "@/components/CategoryCard";
 import { Icon } from "@/components/Icon";
 import { ProductVisual } from "@/components/ProductVisual";
-import { getFeaturedProducts, getNewArrivals, getTopCategories, getAllProducts, getCategoryTreeIds } from "@/lib/catalog";
+import { getFeaturedProducts, getNewArrivals, getHomepageCategories, getAllProducts, getCategoryTreeIds } from "@/lib/catalog";
 import { defaultHomepageContent, loadHomepageContent } from "@/lib/admin/queries";
 import { supabaseConfigured } from "@/lib/supabase/env";
 
@@ -20,7 +20,7 @@ async function getContent() {
 
 export default async function HomePage() {
   const [content, categories, featured, arrivals, all] = await Promise.all([
-    getContent(), getTopCategories(), getFeaturedProducts(4), getNewArrivals(4), getAllProducts(),
+    getContent(), getHomepageCategories(), getFeaturedProducts(4), getNewArrivals(4), getAllProducts(),
   ]);
   const treeIdsByCategory = new Map(
     await Promise.all(categories.map(async (c) => [c.id, await getCategoryTreeIds(c.id)] as const)),

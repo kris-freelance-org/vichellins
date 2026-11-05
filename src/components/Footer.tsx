@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTopCategories } from "@/lib/catalog";
+import { getNavCategories } from "@/lib/catalog";
 import { store, whatsappLink } from "@/lib/config";
 import { Logo } from "./Logo";
 import { Icon } from "./Icon";
@@ -31,7 +31,7 @@ const companyColumn = {
 };
 
 export async function Footer() {
-  const topCategories = await getTopCategories();
+  const topCategories = await getNavCategories();
   const columns = [
     {
       title: "Shop",

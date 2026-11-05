@@ -31,8 +31,8 @@ export default async function BrandsPage() {
             <thead className="border-b border-line">
               <tr>
                 <th className={th}>Brand</th>
-                <th className={th}>Products</th>
-                <th className={`${th} text-right`}></th>
+                <th className={`${th} text-right`}>Products</th>
+                <th className={`${th} text-right`}>Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">

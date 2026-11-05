@@ -8,7 +8,7 @@ export function BrandRow({ id, name, productCount }: { id: string; name: string;
   return (
     <tr>
       <td className={td}>
-        <ActionForm action={updateBrand} className="flex flex-wrap items-center gap-2">
+        <ActionForm action={updateBrand} className="flex items-center gap-2">
           <input type="hidden" name="id" value={id} />
           <label htmlFor={`brand-${id}`} className="sr-only">Brand name</label>
           <input
@@ -16,12 +16,12 @@ export function BrandRow({ id, name, productCount }: { id: string; name: string;
             name="name"
             defaultValue={name}
             required
-            className={`${inputClass} mt-0 min-w-[160px] flex-1`}
+            className={`${inputClass} mt-0 w-full max-w-[260px]`}
           />
           <SubmitButton variant="secondary">Save</SubmitButton>
         </ActionForm>
       </td>
-      <td className={td}>{productCount}</td>
+      <td className={`${td} text-right tabular-nums`}>{productCount}</td>
       <td className={`${td} text-right`}>
         <ActionForm action={deleteBrand} className="inline-flex">
           <input type="hidden" name="id" value={id} />

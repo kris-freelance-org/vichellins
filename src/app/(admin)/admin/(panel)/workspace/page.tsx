@@ -1,8 +1,9 @@
-import { Badge, Card, EmptyState, PageHeader, Table, td, th } from "@/components/admin/ui";
+import { Badge, Card, EmptyState, LinkButton, PageHeader, Table, td, th } from "@/components/admin/ui";
 import { COMMERCE, requireStaff } from "@/lib/admin/auth";
 import { dateOnly } from "@/lib/admin/util";
 import { formatPrice } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
+import { getSitePage } from "@/lib/site-content";
 import {
   AddMemberForm,
   CancelBookingButton,
@@ -47,7 +48,8 @@ type Member = {
   workspace_subscriptions: Sub[];
 };
 
-function BookingRow({ booking }: { booking: Booking }) {
+async function BookingRow({ booking }: { booking: Booking }) {
+  const { values } = await getSitePage("workspace");
   const date = new Date(`${booking.booking_date}T00:00:00`);
   return (
     <tr>
@@ -61,7 +63,7 @@ function BookingRow({ booking }: { booking: Booking }) {
       </td>
       <td className={td}>{dateOnly.format(date)}</td>
       <td className={td}>
-        <ConfirmBookingForm id={booking.id} />
+        <ConfirmBookingForm id={booking.id} defaultAmount={Number(values.day_price)} />
       </td>
       <td className={`${td} text-right`}>
         <div className="flex flex-wrap justify-end gap-2">
@@ -146,6 +148,7 @@ export default async function WorkspacePage() {
       <PageHeader
         title="Workspace"
         description="Walk-in guests and their subscription payments. Record payments taken in person or by transfer."
+          actions={<LinkButton href="/admin/pages/workspace" icon="homepage">Edit workspace page</LinkButton>}
       />
 
       <div className="mb-6 grid gap-3 text-sm @min-[42rem]:grid-cols-4">

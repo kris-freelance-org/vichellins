@@ -402,5 +402,26 @@ check("editor can remove category artwork", (await q("select id from storage.obj
 await q("update categories set image_url=null where slug='phones'");
 check("category image can be removed without deleting category", (await q("select image_url from categories where slug='phones'"))[0].image_url === null);
 
+console.log("\n-- editable site pages");
+await as("authenticated", EDITOR);
+const pageContent = { values: { title: "Our workspace", banner: "/workspace.jpg" }, collections: { gallery: [] } };
+await q("insert into site_settings (key,value) values ('page:workspace',$1::jsonb)", [JSON.stringify(pageContent)]);
+check("editor can publish page content", (await q("select value from site_settings where key='page:workspace'"))[0].value.values.title === "Our workspace");
+const pageImage = (await q("insert into storage.objects (bucket_id,name) values ('product-images','pages/workspace/banner.jpg') returning id"))[0].id;
+check("editor can upload page images to the existing bucket", Boolean(pageImage));
+await as("anon");
+check("visitors can read published page content", (await q("select value from site_settings where key='page:workspace'")).length === 1);
+check("visitors can view page images", (await q("select id from storage.objects where id=$1", [pageImage])).length === 1);
+check("anonymous page creation is rejected", Boolean(await fails(() => q("insert into site_settings (key,value) values ('page:attack','{}')"))));
+await q("update site_settings set value='{}' where key='page:workspace'");
+check("anonymous visitors cannot change page content", (await q("select value from site_settings where key='page:workspace'"))[0].value.values.title === "Our workspace");
+await as("authenticated", CUSTOMER);
+await q("update site_settings set value='{}' where key='page:workspace'");
+check("customers cannot change page content", (await q("select value from site_settings where key='page:workspace'"))[0].value.values.title === "Our workspace");
+await as("authenticated", EDITOR);
+const firstSave = await q("update site_settings set value=$1::jsonb where key='page:workspace' and value=$2::jsonb returning key", [JSON.stringify({ ...pageContent, values: { ...pageContent.values, title: "Updated workspace" } }), JSON.stringify(pageContent)]);
+const staleSave = await q("update site_settings set value=$1::jsonb where key='page:workspace' and value=$2::jsonb returning key", [JSON.stringify({ ...pageContent, values: { ...pageContent.values, title: "Stale edit" } }), JSON.stringify(pageContent)]);
+check("page updates reject stale concurrent edits atomically", firstSave.length === 1 && staleSave.length === 0);
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

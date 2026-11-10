@@ -84,10 +84,12 @@ export function CheckoutClient({
   zones,
   defaultMethods,
   bank,
+  copy,
 }: {
   zones: CheckoutZone[];
   defaultMethods: PaymentDefaults;
   bank: BankAccount;
+  copy: Record<string, string>;
 }) {
   const router = useRouter();
   const { items, subtotal } = useCart();
@@ -161,8 +163,8 @@ export function CheckoutClient({
   if (items.length === 0 && stage === "form") {
     return (
       <div className="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-marine-900">Nothing to check out</h1>
-        <p className="mt-3 text-muted">Your cart&apos;s empty — add something first.</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-marine-900">{copy.empty_title}</h1>
+        <p className="mt-3 text-muted">{copy.empty_body}</p>
         <Link href="/shop" className="mt-6 inline-flex h-12 items-center rounded-full bg-marine-700 px-7 text-sm font-semibold text-white hover:bg-marine-800">
           Browse the shop
         </Link>
@@ -173,8 +175,8 @@ export function CheckoutClient({
   if (zones.length === 0) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6">
-        <h1 className="text-3xl font-semibold tracking-tight text-marine-900">Checkout is temporarily closed</h1>
-        <p className="mt-3 text-muted">Delivery areas haven&apos;t been set yet. Please try again shortly.</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-marine-900">{copy.closed_title}</h1>
+        <p className="mt-3 text-muted">{copy.closed_body}</p>
       </div>
     );
   }
@@ -331,8 +333,8 @@ export function CheckoutClient({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <h1 className="text-3xl font-semibold tracking-tight text-marine-900">Checkout</h1>
-      <p className="mt-2 text-sm text-muted">Delivery within Lagos only. No account needed.</p>
+      <h1 className="text-3xl font-semibold tracking-tight text-marine-900">{copy.title}</h1>
+      <p className="mt-2 text-sm text-muted">{copy.intro}</p>
 
       <form onSubmit={submitOrder} noValidate className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10">
         <div className="min-w-0 space-y-8">

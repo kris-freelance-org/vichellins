@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:db": "node supabase/tests/migration.test.mjs",
+    "test:content": "node --test tests/page-content.test.cjs",
     "typecheck": "next typegen && tsc --noEmit",
     "stack:up": "node supabase/local-stack/setup.mjs",
     "stack:down": "node supabase/local-stack/setup.mjs down"

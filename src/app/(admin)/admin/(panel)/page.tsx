@@ -14,7 +14,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
       <PageHeader title={`Welcome back, ${staff.name}`} description="Your content workspace. Keep the catalogue and storefront looking their best." />
       {params.denied && <Notice tone="gold">You don&apos;t have access to that page.</Notice>}
       <Card title="Make the store your own" description="Manage the categories, brands, and homepage your customers see.">
-        <div className="flex flex-wrap gap-3"><LinkButton href="/admin/categories" icon="categories">Categories &amp; specs</LinkButton><LinkButton href="/admin/brands" icon="brands">Brands</LinkButton><LinkButton href="/admin/homepage" icon="homepage" variant="primary">Edit homepage</LinkButton></div>
+        <div className="flex flex-wrap gap-3"><LinkButton href="/admin/categories" icon="categories">Categories &amp; specs</LinkButton><LinkButton href="/admin/brands" icon="brands">Brands</LinkButton><LinkButton href="/admin/pages" icon="homepage" variant="primary">Edit pages</LinkButton></div>
       </Card>
     </>;
   }

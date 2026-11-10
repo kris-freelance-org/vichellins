@@ -1,9 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
+import { getSitePage, sitePageMetadata } from "@/lib/site-content";
 import { CheckoutClient, type BankAccount, type CheckoutZone, type PaymentDefaults } from "./CheckoutClient";
 
 export const dynamic = "force-dynamic";
+export const generateMetadata = () => sitePageMetadata("checkout");
 
 export default async function CheckoutPage() {
+  const content = await getSitePage("checkout");
   const supabase = await createClient();
   const [{ data: zoneRows }, { data: settingRows }] = await Promise.all([
     supabase
@@ -36,5 +39,5 @@ export default async function CheckoutPage() {
     account_number: settings["payment.bank_account"]?.account_number ?? "",
   };
 
-  return <CheckoutClient zones={zones} defaultMethods={defaultMethods} bank={bank} />;
+  return <CheckoutClient zones={zones} defaultMethods={defaultMethods} bank={bank} copy={content.values} />;
 }

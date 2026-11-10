@@ -8,7 +8,7 @@ const LEGACY_BUCKET = "category-images";
 const MAX_BYTES = 5 * 1024 * 1024;
 const PNG_HEADER = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 
-function imageFormat(bytes: Uint8Array): { extension: string; contentType: string } | null {
+export function imageFormat(bytes: Uint8Array): { extension: string; contentType: string } | null {
   const signature = Buffer.from(bytes.subarray(0, 12));
   if (signature[0] === 0xff && signature[1] === 0xd8 && signature[2] === 0xff) {
     return { extension: "jpg", contentType: "image/jpeg" };

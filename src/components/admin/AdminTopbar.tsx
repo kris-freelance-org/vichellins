@@ -6,6 +6,7 @@ import type { Role } from "@/lib/admin/auth";
 import { AdminIcon } from "./AdminIcon";
 
 const labels: Record<string, string> = {
+  pages: "Pages",
   orders: "Orders", products: "Products", inventory: "Inventory", discounts: "Discounts",
   categories: "Categories & specs", brands: "Brands", homepage: "Homepage", workspace: "Workspace",
   delivery: "Delivery settings", analytics: "Analytics", staff: "Staff", account: "Your account",
@@ -30,7 +31,7 @@ export function AdminTopbar({ name, role }: { name: string; role: Role }) {
     <header className="admin-topbar">
       <nav aria-label="Breadcrumb" className="admin-breadcrumb">
         <Link href="/admin">Store admin</Link><AdminIcon name="chevron" className="h-3.5 w-3.5 text-muted/60" />
-        {segments.length > 1 ? <><Link href={`/admin/${section}`}>{title}</Link><AdminIcon name="chevron" className="h-3.5 w-3.5 text-muted/60" /><span aria-current="page">{segments[1] === "new" ? "Create new" : segments[1] === "import" ? "Import" : "Details"}</span></> : <span aria-current="page">{title}</span>}
+        {segments.length > 1 ? <><Link href={`/admin/${section}`}>{title}</Link><AdminIcon name="chevron" className="h-3.5 w-3.5 text-muted/60" /><span aria-current="page" className="capitalize">{section === "pages" ? segments[1].replace(/-/g, " ") : segments[1] === "new" ? "Create new" : segments[1] === "import" ? "Import" : "Details"}</span></> : <span aria-current="page">{title}</span>}
       </nav>
       {contextualSearch && <form action={contextualSearch.action} role="search" aria-label="Admin search" className="admin-global-search">
         <label htmlFor="admin-global-q" className="sr-only">{contextualSearch.placeholder.replace("…", "")}</label>

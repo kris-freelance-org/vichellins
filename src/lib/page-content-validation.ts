@@ -18,6 +18,7 @@ function fieldError(field: ContentField, value: unknown): string | null {
   if (field.required && !value.trim()) return `Enter ${field.label.toLowerCase()}.`;
   if (field.type === "link" && !safeContentLink(value)) return `Use a website address or a path beginning with / for ${field.label.toLowerCase()}.`;
   if (field.type === "image" && !validPageImage(value)) return `Upload a valid image for ${field.label.toLowerCase()}.`;
+  if (field.type === "select" && !field.options?.some(option => option.value === value)) return `Choose a valid option for ${field.label.toLowerCase()}.`;
   if (field.type === "number" && (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value)) || Number(value) > 100000000)) return `Enter a whole number between 0 and 100,000,000 for ${field.label.toLowerCase()}.`;
   return null;
 }

@@ -9,7 +9,9 @@ export function WorkspaceView({ content }: { content: PageContent }) {
   const whatsapp = (message: string) => `https://wa.me/${v.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
   return <>
     <section className="relative isolate overflow-hidden bg-marine-900 text-white">
-      {v.banner && <Image src={v.banner} alt={v.banner_alt} fill preload sizes="100vw" className="-z-20 object-cover" />}
+      {v.banner && <Image src={v.banner} alt={v.banner_alt} fill preload sizes="100vw" quality={90}
+        unoptimized={v.banner_fit !== "cover"}
+        className={`-z-20 ${v.banner_fit === "cover" ? "object-cover" : "object-scale-down object-right"}`} />}
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-marine-950/95 via-marine-950/80 to-marine-950/40" />
       <div className="store-container flex min-h-[520px] items-center py-16 sm:min-h-[580px] sm:py-24">
         <div className="max-w-2xl">

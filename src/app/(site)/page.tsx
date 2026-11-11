@@ -45,7 +45,7 @@ export default async function HomePage() {
               <Link href={v.hero_link || "/shop"} className="group mt-7 inline-flex min-h-12 items-center justify-center gap-6 rounded-xl bg-gold-400 px-6 text-sm font-semibold text-marine-950 transition-colors hover:bg-gold-300">{v.hero_button}<Icon name="arrow" className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
               <p className="mt-6 flex items-center gap-2 text-[11px] text-marine-100"><Icon name="shield" className="h-4 w-4 shrink-0 text-gold-300" />{v.hero_note}</p>
             </div>
-            {v.hero_image && <Image src={v.hero_image} alt={v.hero_alt} width={1081} height={951} preload sizes="(min-width: 1024px) 670px, (min-width: 640px) 70vw, 110vw" className="hero-phones pointer-events-none absolute max-w-none" />}
+            {v.hero_image && <Image src={v.hero_image} alt={v.hero_alt} width={1081} height={951} preload unoptimized className="hero-phones pointer-events-none absolute max-w-none object-scale-down object-right-bottom" />}
             <span aria-hidden="true" className="hero-image-label absolute bottom-7 right-7 text-[10px] uppercase tracking-[0.22em] text-marine-100">{v.image_caption}</span>
           </div>
           <Link href={wearables ? `/category/${wearables.slug}` : "/shop"} className="wearable-feature group relative isolate flex overflow-hidden rounded-[1.75rem] bg-[#f3f0e6] text-foreground">

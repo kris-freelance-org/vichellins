@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "6mb" },
   },
   images: {
+    qualities: [75, 90],
     remotePatterns: supabasePattern ? [supabasePattern] : [],
   },
   turbopack: {

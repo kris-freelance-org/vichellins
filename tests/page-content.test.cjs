@@ -85,3 +85,14 @@ test("reordered gallery images retain the correct upload destinations", () => {
   slots.find(slot => slot.name === "image__gallery__0__image").set("/replacement.jpg");
   assert.deepEqual(data.collections.gallery, [{ image: "/replacement.jpg", alt: "Second" }, { image: "/first.jpg", alt: "First" }]);
 });
+
+test("existing workspace pages default to sizing that avoids enlargement", () => {
+  const old = defaultPageContent("workspace");
+  delete old.values.banner_fit;
+  const content = mergePageContent("workspace", old);
+  assert.equal(content.values.banner_fit, "natural");
+  content.values.banner_fit = "cover";
+  assert.equal(validatePageContent("workspace", content).error, undefined);
+  content.values.banner_fit = "invalid";
+  assert.match(validatePageContent("workspace", content).error, /valid option/);
+});

@@ -40,7 +40,7 @@ Sign in at `/admin`. Roles: **owner** (everything, plus staff accounts), **staff
 
 - **Dashboard and analytics:** sales per day, best sellers, low stock, what needs attention, funnel and sources.
 - **Pages:** open `/admin/pages` to edit the homepage, workspace, information pages, shop, cart, checkout, and booking/order confirmation copy. Product and category content stays in the catalogue editors. Existing homepage edits are retained, and `/admin/homepage` redirects to the new editor.
-- **Workspace banner and gallery:** open **Pages → Workspace**, upload a wide banner photo, add gallery photos and image descriptions, then save. JPG, PNG and WebP are supported, with up to 5 MB of uploads per save. Prices, amenities, plans, opening hours and address are editable here too. The day-pass price is shared with the booking screens and the admin payment default.
+- **Workspace banner and gallery:** open **Pages → Workspace**, upload a wide banner photo, add gallery photos and image descriptions, then save. JPG, PNG and WebP are supported, with up to 5 MB of uploads per save. Banners default to **Keep original size**, displaying the source image without enlargement or another compression pass. **Fill banner** crops to fill the space and uses higher-quality responsive optimization; use a landscape original around 1920 × 1080 px or larger. The editor shows image dimensions and warns when a banner is small. Prices, amenities, plans, opening hours and address are editable here too. The day-pass price is shared with the booking screens and the admin payment default.
 - **Orders:** list and search, status workflow (pending, confirmed, packed, out for delivery, delivered; cancel or refund), payment status, staff notes, printable invoice and packing slip, and "Record an order" for WhatsApp, Instagram or phone orders.
 - **Products:** variants (colour, storage, RAM), warranty and authenticity, spec fields that depend on the category, photo upload, draft/published/archived.
 - **Categories and spec fields:** create categories with optional JPG, PNG or WebP artwork (up to 5 MB), replace or remove images, and define spec fields. Category card artwork stays anchored to the right on every screen size; cards highlight on a staggered seven-second cycle and respect reduced motion. Spec fields are inherited by sub-categories and can become shop filters.
@@ -64,7 +64,7 @@ Things worth knowing:
 
 ## Tests
 
-`npm run test:db` applies the migrations to an in-memory Postgres and attacks them as a shopper, a customer, an editor and the owner (150 checks, including page and category artwork permissions). The admin screens were also driven end to end in a browser against the local stack. `npm run test:content` runs nine validation checks for editable page data and image destinations.
+`npm run test:db` applies the migrations to an in-memory Postgres and attacks them as a shopper, a customer, an editor and the owner (150 checks, including page and category artwork permissions). The admin screens were also driven end to end in a browser against the local stack. `npm run test:content` runs ten validation checks for editable page data, image destinations, and sizing options.
 
 Category artwork is stored in the existing public `product-images` bucket under `categories/<category-id>/`. The base category schema already includes `image_url`, so existing projects with product image uploads configured need no additional migration.
 

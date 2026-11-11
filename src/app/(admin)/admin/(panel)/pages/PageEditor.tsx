@@ -9,13 +9,19 @@ import { saveSitePage } from "./actions";
 function ImageField({ name, value, onChange }: { name: string; value: string; onChange: (value: string) => void }) {
   const [preview, setPreview] = useState("");
   const [error, setError] = useState("");
+  const [dimensions, setDimensions] = useState<{ src: string; width: number; height: number } | null>(null);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
   const url = preview || value;
+  const isWorkspaceBanner = name === "image__banner";
+  const isBanner = isWorkspaceBanner || name === "image__hero_image";
+  const size = dimensions?.src === url ? dimensions : null;
+  const small = isBanner && size && (size.width < (isWorkspaceBanner ? 1600 : 1200) || size.height < (isWorkspaceBanner ? 800 : 600));
   return <div className="mt-2 space-y-3">
     {url ? <div className="overflow-hidden rounded-xl border border-line bg-surface">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={url} alt="Selected image preview" className="max-h-64 w-full object-contain" />
+      <img src={url} alt="Selected image preview" className="mx-auto max-h-64 max-w-full object-scale-down"
+        onLoad={event => setDimensions({ src: url, width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} />
     </div> : <p className="rounded-xl border border-dashed border-line bg-surface p-6 text-sm text-muted">No image selected. Choose a photo below.</p>}
     <input ref={input} id={name} name={name} type="file" accept="image/jpeg,image/png,image/webp" aria-invalid={Boolean(error)} aria-describedby={`${name}-hint${error ? ` ${name}-error` : ""}`}
       className="block min-h-11 w-full min-w-0 rounded-xl border border-line p-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-marine-50 file:px-3 file:py-2 file:text-marine-800"
@@ -28,7 +34,11 @@ function ImageField({ name, value, onChange }: { name: string; value: string; on
         }
         setPreview(URL.createObjectURL(file));
       }} />
-    <p id={`${name}-hint`} className="text-xs text-muted">JPG, PNG or WebP. Wide photos work best for banners.</p>
+    <div id={`${name}-hint`} className="space-y-2 text-xs leading-relaxed text-muted">
+      <p>JPG, PNG or WebP.{size && <span className="ml-1 font-medium tabular-nums">{size.width} × {size.height} px.</span>}</p>
+      {isBanner && <p>{isWorkspaceBanner ? "For a full-width banner, use a landscape photo around 1920 × 1080 px or larger." : "For a sharp homepage banner, use an image at least 1400 px wide."}</p>}
+      {small && <p className="rounded-lg bg-gold-100 px-3 py-2 text-gold-700">This image is small for a banner. It will keep its original size to avoid stretching{isWorkspaceBanner ? "; choosing Fill banner may make it look blurry" : ""}. A larger original photo will look sharper.</p>}
+    </div>
     {error && <p id={`${name}-error`} role="alert" className="text-sm text-danger-700">{error}</p>}
     {url && <button type="button" className="min-h-11 rounded-lg px-2 text-xs font-medium text-danger-700 hover:bg-danger-50" onClick={() => { onChange(""); setPreview(""); if (input.current) input.current.value = ""; }}>Remove image</button>}
   </div>;
@@ -38,6 +48,7 @@ function EditorField({ field, value, name, onChange }: { field: ContentField; va
   const id = field.type === "image" ? name : `field-${name}`;
   return <Field label={field.label} htmlFor={id} hint={field.hint}>
     {field.type === "image" ? <ImageField name={name} value={value} onChange={onChange} />
+      : field.type === "select" ? <select id={id} value={value} required={field.required} onChange={e => onChange(e.target.value)} className={inputClass}>{field.options?.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
       : field.type === "textarea" ? <textarea id={id} rows={4} value={value} required={field.required} maxLength={20000} onChange={e => onChange(e.target.value)} className={`${inputClass} h-auto py-3`} />
       : <input id={id} type={field.type === "number" ? "number" : "text"} min={field.type === "number" ? 0 : undefined} max={field.type === "number" ? 100000000 : undefined} step={field.type === "number" ? 1 : undefined} value={value} required={field.required} maxLength={1000} onChange={e => onChange(e.target.value)} className={inputClass} />}
   </Field>;

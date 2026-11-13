@@ -28,7 +28,7 @@ export async function Header() {
           <Link href="/delivery-returns" className="hidden items-center gap-2 text-marine-100 hover:text-white sm:inline-flex">Delivery &amp; returns <Icon name="arrow" className="h-3.5 w-3.5" /></Link>
         </div>
       </div>
-      <header className="sticky top-0 z-40 border-b border-line bg-white">
+      <header className="site-header sticky top-0 z-40 border-b border-line">
         <div className="store-container flex min-h-19 items-center gap-5 lg:gap-10">
           <Logo className="h-10 w-auto rounded-md sm:h-11" />
           <SearchForm className="hidden max-w-xl flex-1 md:flex" />

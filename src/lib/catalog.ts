@@ -214,15 +214,14 @@ const fetchFromSupabase = unstable_cache(
   { tags: [CATALOG_TAG] },
 );
 
+const emptyCatalog: Catalog = { categories: [], brands: [], specDefinitions: [], products: [] };
+
 export const loadCatalog = cache(async (): Promise<Catalog> => {
   if (!supabaseConfigured) return sampleCatalog;
   try {
-    const data = await fetchFromSupabase();
-    // Empty catalogue early on: fall back to sample data so the storefront isn't blank.
-    if (!data || data.products.length === 0) return sampleCatalog;
-    return data;
+    return (await fetchFromSupabase()) ?? emptyCatalog;
   } catch {
-    return sampleCatalog;
+    return emptyCatalog;
   }
 });
 
